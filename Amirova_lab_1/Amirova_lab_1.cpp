@@ -92,41 +92,122 @@ void edit_station(oil_pumping_station& s) {
 void save_pipe(const oil_pipe& p) {
     ofstream fout;
     fout.open ("oil_pipes.txt", ios::out);
-    fout << p.name << endl<< p.lenght << endl << p.diameter << endl << p.reparied << endl;
-    fout.close();
+    if (fout.is_open()) {
+        fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
+        fout.close();
+    }
 }
 
 void save_station(const oil_pumping_station& s) {
     ofstream fout;
     fout.open("oil_pumping_stations.txt", ios::out);
-    fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild  << endl << s.effectiveness << endl;
-    fout.close();
+    if (fout.is_open()) {
+        fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
+        fout.close();
+    }
 }
 
-void load_pipe() {
+oil_pipe load_pipe() {
     oil_pipe p;
     ifstream fin;
     fin.open("oil_pipes.txt", ios:: in);
-    fin >> p.name >> p.lenght >> p.diameter >> p.reparied;
-    fin.close();
+    if (fin.is_open()) {
+        fin >> p.name >> p.lenght >> p.diameter >> p.reparied;
+        fin.close();
+    }
+    return p;
 
 }
 
-void load_station() {
+oil_pumping_station load_station() {
     oil_pumping_station s;
     ifstream fin;
     fin.open("oil_pumping_stations.txt", ios:: in);
-    fin >> s.name >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
-    fin.close();
+    if (fin.is_open()) {
+        fin >> s.name >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
+        fin.close();
+    }
+    return s;
+}
+
+void menu() {
+    cout << "Menu" << endl
+        << "1 - create oil pipe" << endl
+        << "2 - create oil pumping station" << endl
+        << "3 - show all objects" << endl
+        << "4 - edit oil pipe" << endl
+        << "5 - edit oil pumping station" << endl
+        << "6 - save oil pipe to file" << endl
+        << "7 - save oil pumping station to file" << endl
+        << "8 - load oil pipe from file" << endl
+        << "9 - load oil pumping station from file" << endl
+        << "0 - exit" << endl;
 }
 
 int main()
 {
-    oil_pipe pipe1;
-    oil_pumping_station st;
-    vector <oil_pipe> pipes;
-    vector <oil_pumping_station> stations;
-    st = create_station();
-    save_station(st);
+    oil_pipe p;
+    oil_pumping_station s;
+
+    while (1) {
+        menu();
+        int command = 0;
+        cin >> command;
+        switch (command) {
+        case 1: 
+        {
+            p = create_pipe();
+            break;
+        }
+        case 2:
+        {
+            s = create_station();
+            break;
+        }
+        case 3:
+        {
+            print_pipe(p);
+            print_station(s);
+            break;
+        }
+        case 4:
+        {   
+            edit_pipe(p);
+            break;
+        }
+        case 5:
+        {
+            edit_station(s);
+            break;
+        }
+        case 6:
+        {  
+            save_pipe(p);
+            break;
+        }
+        case 7:
+        {
+            save_station(s);
+            break;
+        }
+        case 8:
+        {
+            print_pipe(load_pipe());
+            break;
+        }
+        case 9:
+        {
+            print_station(load_station());
+            break;
+        }
+        case 0:
+        {
+            return 0;
+        }
+        default: {
+            cout << "Wrong action" << endl;
+        }
+        }
+    }
     return 0;
 }
