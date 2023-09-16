@@ -17,93 +17,168 @@ struct oil_pumping_station
     string name;
     int number_of_guild;
     int number_of_working_guild;
-    int effectiveness;
+    float effectiveness;
 
 };
 
-oil_pipe create_pipe() {
+oil_pipe create_pipe(int& pipe_counter) {
 
     oil_pipe new_pipe;
     cout << "Oil pipe" << endl;
     cout << "Name: ";
     cin >> new_pipe.name;
-    cout << "Lenght: ";
-    cin >> new_pipe.lenght;
-    cout << "Diameter: ";
-    cin >> new_pipe.diameter;
-    cout << "Is reparied (true/false): ";
-    cin >> new_pipe.reparied;
+
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Lenght: ";
+        cin >> new_pipe.lenght;
+    } while (cin.fail() || new_pipe.lenght <= 0);
+
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Diameter: ";
+        cin >> new_pipe.diameter;
+    } while (cin.fail() || new_pipe.diameter <= 0);
+
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Is reparied (true - 0 /false - 1): ";
+        cin >> new_pipe.reparied;
+    } while (cin.fail());
+
+    pipe_counter++;
     return new_pipe;
 }
 
-oil_pumping_station create_station() {
+oil_pumping_station create_station(int& station_counter) {
 
     oil_pumping_station new_station;
     cout << "Oil station" << endl;
     cout << "Name: ";
     cin >> new_station.name;
-    cout << "Number of guild: ";
-    cin >> new_station.number_of_guild;
-    cout << "Number of working guild: ";
-    cin >> new_station.number_of_working_guild;
-    cout << "Effectiveness: ";
-    cin >> new_station.effectiveness;
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Number of guild: ";
+        cin >> new_station.number_of_guild;
+    } while (cin.fail() || new_station.number_of_guild <= 0);
+
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Number of working guild: ";
+        cin >> new_station.number_of_working_guild;
+    } while (cin.fail() || new_station.number_of_working_guild < 0 || new_station.number_of_working_guild > new_station.number_of_guild);
+
+    do {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Effectiveness: ";
+        cin >> new_station.effectiveness;
+    } while (cin.fail() || new_station.effectiveness <= 0);
+
+    station_counter++;
     return new_station;
 }
 
-void print_pipe(const oil_pipe& p) {
-    cout << "Oil pipe" << endl;
-    cout << "Name: " << p.name
-        << "\tLenght: " << p.lenght
-        << "\tDiameter: " << p.diameter
-        << "\tReparied: " << p.reparied << endl;
-}
-
-void print_station(const oil_pumping_station& s) {
-    cout << "Oil station" << endl;
-    cout << "Name: " << s.name
-        << "\tNumber of guild: " << s.number_of_guild
-        << "\tNumber of working guild: " << s.number_of_working_guild
-        << "\tEffectiveness: " << s.effectiveness << endl;
-}
-
-void edit_pipe(oil_pipe& p) {
-    if (p.reparied == true) {
-        p.reparied = false;
+void print_pipe(int& pipe_counter, const oil_pipe& p) {
+    if (pipe_counter == 0) {
+        cout << "no pipe" << endl;
     }
     else {
-        p.reparied = true;
+        cout << "Oil pipe" << endl;
+        cout << "Name: " << p.name
+            << "\tLenght: " << p.lenght
+            << "\tDiameter: " << p.diameter
+            << "\tReparied: " << p.reparied << endl;
     }
 }
 
-void edit_station(oil_pumping_station& s) {
-    int command;
-    cout << "0 - start-up guild" << endl;
-    cout << "1 - stop guild" << endl;
-    cin >> command;
-    if (command == 0) {
-        s.number_of_working_guild ++ ;
+void print_station(int& station_counter, const oil_pumping_station& s) {
+    if (station_counter == 0) {
+        cout << "no station" << endl;
     }
-    if (command == 1) {
-        s.number_of_working_guild -= 1;
-    }
-}
-
-void save_pipe(const oil_pipe& p) {
-    ofstream fout;
-    fout.open ("oil_pipes.txt", ios::out);
-    if (fout.is_open()) {
-        fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
-        fout.close();
+    else {
+        cout << "Oil station" << endl;
+        cout << "Name: " << s.name
+            << "\tNumber of guild: " << s.number_of_guild
+            << "\tNumber of working guild: " << s.number_of_working_guild
+            << "\tEffectiveness: " << s.effectiveness << endl;
     }
 }
 
-void save_station(const oil_pumping_station& s) {
-    ofstream fout;
-    fout.open("oil_pumping_stations.txt", ios::out);
-    if (fout.is_open()) {
-        fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
-        fout.close();
+void edit_pipe(int& pipe_counter, oil_pipe& p) {
+    if (pipe_counter == 0) {
+        cout << "no pipe" << endl;
+    }
+    else {
+        if (p.reparied == true) {
+            p.reparied = false;
+            cout << "the pipe is not being repaired now" << endl;
+        }
+        else {
+            p.reparied = true;
+            cout << "the pipe is being repaired now" << endl;
+        }
+    }
+}
+
+void edit_station(int& station_counter, oil_pumping_station& s) {
+    if (station_counter == 0) {
+        cout << "no station" << endl;
+    }
+    else {
+        int command;
+        do {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "0 - start-up guild" << endl
+                << "1 - stop guild" << endl;
+            cin >> command;
+        } while (cin.fail() || (command != 0 && command != 1));
+
+        if (command == 0 && (s.number_of_guild - s.number_of_working_guild > 0)) {
+            s.number_of_working_guild++;
+        }
+        if (command == 1 && (s.number_of_working_guild > 0)) {
+            s.number_of_working_guild -= 1;
+        }
+        else {
+            cout << "wrong action" << endl;
+        }
+    }
+}
+
+void save_pipe(const int& pipe_counter, const oil_pipe& p) {
+    if (pipe_counter == 0) {
+        cout << "no pipe" << endl;
+    }
+    else {
+        ofstream fout;
+        fout.open("oil_pipes.txt", ios::out);
+        if (fout.is_open()) {
+            fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
+            fout.close();
+            cout << "pipe successfully saved to file";
+        }
+    }
+}
+
+void save_station(const int& station_counter, const oil_pumping_station& s) {
+    if (station_counter == 0) {
+        cout << "no station" << endl;
+    }
+    else {
+        ofstream fout;
+        fout.open("oil_pumping_stations.txt", ios::out);
+        if (fout.is_open()) {
+            fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
+            fout.close();
+            cout << "station successfully saved to file";
+        }
     }
 }
 
@@ -142,62 +217,72 @@ void menu() {
         << "8 - load oil pipe from file" << endl
         << "9 - load oil pumping station from file" << endl
         << "0 - exit" << endl;
+
 }
 
 int main()
 {
     oil_pipe p;
     oil_pumping_station s;
+    int pipe_counter = 0;
+    int station_counter = 0;
 
     while (1) {
+        int command;
+        int a;
         menu();
-        int command = 0;
-        cin >> command;
+        cin >> a;
+        do {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cin >> command;
+        } while (cin.fail() || command < 0 || command > 9);
+
         switch (command) {
         case 1: 
         {
-            p = create_pipe();
+            p = create_pipe(pipe_counter);
             break;
         }
         case 2:
         {
-            s = create_station();
+            s = create_station(station_counter);
             break;
         }
         case 3:
         {
-            print_pipe(p);
-            print_station(s);
+            print_pipe(pipe_counter, p);
+            print_station(station_counter, s);
             break;
         }
         case 4:
         {   
-            edit_pipe(p);
+            edit_pipe(pipe_counter, p);
             break;
         }
         case 5:
         {
-            edit_station(s);
+            edit_station(station_counter, s);
             break;
         }
         case 6:
         {  
-            save_pipe(p);
+            save_pipe(pipe_counter, p);
             break;
         }
         case 7:
         {
-            save_station(s);
+            save_station(station_counter, s);
             break;
         }
         case 8:
         {
-            print_pipe(load_pipe());
+            print_pipe(pipe_counter, load_pipe());
             break;
         }
         case 9:
         {
-            print_station(load_station());
+            print_station(station_counter, load_station());
             break;
         }
         case 0:
