@@ -1,6 +1,6 @@
 ﻿#include <iostream>
-#include <vector>
 #include <fstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -162,7 +162,7 @@ void save_pipe(const int& pipe_counter, const oil_pipe& p) {
         if (fout.is_open()) {
             fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
             fout.close();
-            cout << "pipe successfully saved to file";
+            cout << "pipe successfully saved to file"<<endl;
         }
     }
 }
@@ -177,7 +177,7 @@ void save_station(const int& station_counter, const oil_pumping_station& s) {
         if (fout.is_open()) {
             fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
             fout.close();
-            cout << "station successfully saved to file";
+            cout << "station successfully saved to file"<<endl;
         }
     }
 }
@@ -217,7 +217,6 @@ void menu() {
         << "8 - load oil pipe from file" << endl
         << "9 - load oil pumping station from file" << endl
         << "0 - exit" << endl;
-
 }
 
 int main()
@@ -227,71 +226,52 @@ int main()
     int pipe_counter = 0;
     int station_counter = 0;
 
-    while (1) {
-        int command;
-        int a;
+    while (true) {
         menu();
-        cin >> a;
-        do {
+        int command = 0;
+        cin >> command;
+        try {
+            if (cin.fail() || command < 0 || command > 9) {
+                throw out_of_range("Invalid input. Please enter a number between 0 and 9.");
+            }
+
+            switch (command) {
+            case 1:
+                p = create_pipe(pipe_counter);
+                break;
+            case 2:
+                s = create_station(station_counter);
+                break;
+            case 3:
+                print_pipe(pipe_counter, p);
+                print_station(station_counter, s);
+                break;
+            case 4:
+                edit_pipe(pipe_counter, p);
+                break;
+            case 5:
+                edit_station(station_counter, s);
+                break;
+            case 6:
+                save_pipe(pipe_counter, p);
+                break;
+            case 7:
+                save_station(station_counter, s);
+                break;
+            case 8:
+                print_pipe(pipe_counter, load_pipe());
+                break;
+            case 9:
+                print_station(station_counter, load_station());
+                break;
+            case 0:
+                return 0;
+            }
+        }
+        catch (const out_of_range& e) {
+            cerr << "Error: " << e.what() << endl;
             cin.clear();
             cin.ignore(1000, '\n');
-            cin >> command;
-        } while (cin.fail() || command < 0 || command > 9);
-
-        switch (command) {
-        case 1: 
-        {
-            p = create_pipe(pipe_counter);
-            break;
-        }
-        case 2:
-        {
-            s = create_station(station_counter);
-            break;
-        }
-        case 3:
-        {
-            print_pipe(pipe_counter, p);
-            print_station(station_counter, s);
-            break;
-        }
-        case 4:
-        {   
-            edit_pipe(pipe_counter, p);
-            break;
-        }
-        case 5:
-        {
-            edit_station(station_counter, s);
-            break;
-        }
-        case 6:
-        {  
-            save_pipe(pipe_counter, p);
-            break;
-        }
-        case 7:
-        {
-            save_station(station_counter, s);
-            break;
-        }
-        case 8:
-        {
-            print_pipe(pipe_counter, load_pipe());
-            break;
-        }
-        case 9:
-        {
-            print_station(station_counter, load_station());
-            break;
-        }
-        case 0:
-        {
-            return 0;
-        }
-        default: {
-            cout << "Wrong action" << endl;
-        }
         }
     }
     return 0;
