@@ -30,10 +30,12 @@ oil_pipe create_pipe() {
     getline(cin, new_pipe.name);
 
     do {
-        cin.clear();
-        cin.ignore(1000, '\n');
         cout << "Lenght: ";
         cin >> new_pipe.lenght;
+        if (cin.fail() || new_pipe.lenght <= 0) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
     } while (cin.fail() || new_pipe.lenght <= 0);
 
     do {
@@ -59,11 +61,14 @@ oil_pumping_station create_station() {
     cout << "Name: ";
     cin.ignore(1000, '\n');
     getline(cin, new_station.name);
+
     do {
-        cin.clear();
-        cin.ignore(1000, '\n');
         cout << "Number of guild: ";
         cin >> new_station.number_of_guild;
+        if (cin.fail() || new_station.number_of_guild <= 0) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
     } while (cin.fail() || new_station.number_of_guild <= 0);
 
     do {

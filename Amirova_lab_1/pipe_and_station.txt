@@ -1,0 +1,6 @@
+oil pipe
+name: p 100
+lenght: 12
+diameter: 11
+Is reparied (true - 0 /false - 1): 0
+no station in file
