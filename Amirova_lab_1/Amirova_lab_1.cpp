@@ -7,7 +7,7 @@ using namespace std;
 struct oil_pipe
 {
     string name;
-    float lenght;
+    double lenght;
     int diameter;
     bool reparied;
 };
@@ -21,114 +21,41 @@ struct oil_pumping_station
 
 };
 
-oil_pipe create_pipe() {
-
-    oil_pipe new_pipe;
-    double diameter;
-    cout << "Oil pipe" << endl;
-    cout << "Name: ";
-    cin.ignore(1000, '\n');
-    getline(cin, new_pipe.name);
-
+template <typename T>
+T get_correct_number (T min, T max){
+    T x;
     do {
-        cout << "Lenght: ";
-        cin >> new_pipe.lenght;
-        if (cin.fail() || new_pipe.lenght <= 0) {
+        cout << "Type number (" << min << " - " << max << " ): ";
+        cin >> x;
+        if (cin.fail() || x > max || x < min) {
             cin.clear();
             cin.ignore(1000, '\n');
         }
-    } while (cin.fail() || new_pipe.lenght <= 0);
+    } while (cin.fail() || x > max || x < min);
+    return x;
+}
 
+bool get_correct_bool() {
+    bool x;
     do {
         cin.clear();
         cin.ignore(1000, '\n');
-        cout << "Diameter: ";
-        cin >> diameter;
-    } while (cin.fail() || diameter <= 0 || diameter != static_cast<int>(diameter));
-    new_pipe.diameter = diameter;
-
-    do {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        cout << "Is reparied (true - 0 /false - 1): ";
-        cin >> new_pipe.reparied;
+        cout << "Type (true - 1 /false - 0): ";
+        cin >> x;
     } while (cin.fail());
-    return new_pipe;
+    return x;
 }
-
-oil_pumping_station create_station() {
-
-    oil_pumping_station new_station;
-    cout << "Oil station" << endl;
-    cout << "Name: ";
-    cin.ignore(1000, '\n');
-    getline(cin, new_station.name);
-
-    do {
-        cout << "Number of guild: ";
-        cin >> new_station.number_of_guild;
-        if (cin.fail() || new_station.number_of_guild <= 0) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-        }
-    } while (cin.fail() || new_station.number_of_guild <= 0);
-
-    do {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        cout << "Number of working guild: ";
-        cin >> new_station.number_of_working_guild;
-    } while (cin.fail() || new_station.number_of_working_guild < 0 || new_station.number_of_working_guild > new_station.number_of_guild);
-
-    do {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        cout << "Effectiveness: ";
-        cin >> new_station.effectiveness;
-    } while (cin.fail() || new_station.effectiveness <= 0);
-    return new_station;
-}
-
-void print_pipe(const oil_pipe& p) {
-    cout << "Oil pipe" << endl;
-    cout << "Name: " << p.name
-        << "\tLenght: " << p.lenght
-        << "\tDiameter: " << p.diameter
-        << "\tReparied: " << p.reparied << endl;
-}
-
-void print_station(const oil_pumping_station & s) {
-            cout << "Oil station" << endl;
-            cout << "Name: " << s.name
-                << "\tNumber of guild: " << s.number_of_guild
-                << "\tNumber of working guild: " << s.number_of_working_guild
-                << "\tEffectiveness: " << s.effectiveness << endl;
-        }
 
 void edit_pipe(oil_pipe& p) {
     p.reparied = !p.reparied;
-    cout << "pipe status (0 - is reparied, 1 - is not reparied): " << p.reparied << endl;
+    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << p.reparied << endl;
 }
 
 void edit_station(oil_pumping_station& s) {
         int command;
-        do {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "0 - start-up guild" << endl
-                << "1 - stop guild" << endl;
-            cin >> command;
-        } while (cin.fail() || (command != 0 && command != 1));
-
-        if (command == 0 && (s.number_of_guild - s.number_of_working_guild > 0)) {
-            s.number_of_working_guild++;
-        }
-        if (command == 1 && (s.number_of_working_guild > 0)) {
-            s.number_of_working_guild -= 1;
-        }
-        else {
-            cout << "wrong action" << endl;
-        }
+        cout << "Number of working guild" << endl;
+        s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
+        cout << "Number of working guild: " << s.number_of_working_guild << endl;
 }
 
 void save_to_file(const oil_pipe& p, const oil_pumping_station& s, bool is_pipe, bool is_station) {
@@ -170,9 +97,7 @@ void load_from_file(oil_pipe& p, oil_pumping_station& s, bool& is_pipe, bool& is
     bool is_station_in_file;
     int command = 1;
     string a;
-    ifstream fin;
-    ifstream openfile("pipe_and_station.txt");
-    fin.open("pipe_and_station.txt", ios:: in);
+    ifstream fin("pipe_and_station.txt");
     if (!fin.is_open()) {
         cout << "File is not open(the file may not exist)" << endl;
         return;
@@ -189,7 +114,8 @@ void load_from_file(oil_pipe& p, oil_pumping_station& s, bool& is_pipe, bool& is
         }
         if (command == 1) {
             is_pipe = true;
-            getline(openfile, p.name);
+            //getline(fin, p.name);
+            fin >> p.name;
             fin >> p.lenght;
             fin >> p.diameter;
             fin >> p.reparied;
@@ -233,6 +159,50 @@ void load_from_file(oil_pipe& p, oil_pumping_station& s, bool& is_pipe, bool& is
      else cout << "no station in file" << endl;
 }
 
+ostream& operator << (ostream& out, const oil_pipe& p) {
+    out << "Name: " << p.name
+        << "\tLenght: " << p.lenght
+        << "\tDiameter: " << p.diameter
+        << "\tReparied: " << p.reparied << endl;
+    return out;
+}
+
+ostream& operator << (ostream& out, const oil_pumping_station& s) {
+    out << "Name: " << s.name
+        << "\tNumber of guild: " << s.number_of_guild
+        << "\tNumber of working guild: " << s.number_of_working_guild
+        << "\tEffectiveness: " << s.effectiveness << endl;
+    return out;
+}
+
+istream& operator >> (istream& in, oil_pipe& p) {
+    cout << "Oil pipe" << endl;
+    cout << "Name: ";
+    in.ignore(1000, '\n');
+    getline(in, p.name);
+    cout << "Lenght" << endl;
+    p.lenght = get_correct_number(1.0, 1000.0);
+    cout << "Diameter" << endl;
+    p.diameter = get_correct_number(1, 1000);
+    cout << "Is reparied (1 - yes, 0 - no): " << endl;
+    p.reparied = get_correct_bool();
+    return in;
+}
+
+istream& operator >> (istream& in, oil_pumping_station& s) {
+    cout << "Oil station" << endl;
+    cout << "Name: ";
+    cin.ignore(1000, '\n');
+    getline(cin, s.name);
+    cout << "Number of guild" << endl;
+    s.number_of_guild = get_correct_number(1, 1000);
+    cout << "Number of working guild" << endl;
+    s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
+    cout << "Effectiveness" << endl;
+    s.effectiveness = get_correct_number(0, 100);
+    return in;
+}
+
 void menu() {
     cout << "Menu" << endl
         << "1 - create oil pipe" << endl
@@ -254,7 +224,7 @@ int main()
 
     while (true) {
         menu();
-        int command = 0;
+        int command;
         cin >> command;
         if (cin.fail() || command < 0 || command > 7)
         {
@@ -266,19 +236,19 @@ int main()
 
         switch (command) {
         case 1:
-            p = create_pipe();
+            cin >> p;
             is_pipe = true;
             break;
 
         case 2:
-            s = create_station();
+            cin >> s;
             is_station = true;
             break;
 
         case 3:
-            if (is_pipe) print_pipe(p);
+            if (is_pipe) cout << p;
             else cout << "no pipe" << endl;
-            if (is_station) print_station(s);
+            if (is_station) cout << s;
             else  cout << "no station" << endl;
             break;
 
