@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -58,105 +59,42 @@ void edit_station(oil_pumping_station& s) {
         cout << "Number of working guild: " << s.number_of_working_guild << endl;
 }
 
-void save_to_file(const oil_pipe& p, const oil_pumping_station& s, bool is_pipe, bool is_station) {
-    ofstream fout;
-    fout.open("pipe_and_station.txt", ios::out);
-    if (fout.is_open()) {
-        if (is_pipe) {
-            fout << true << endl
-                << p.name << endl
-                << p.lenght << endl
-                << p.diameter << endl
-                << p.reparied << endl;
-            cout << "pipe successfully saved to file" << endl;
-        }
-        else {
-            fout << false << endl;
-            cout << "no pipe to save" << endl;
-        }
-
-        if (is_station) {
-            fout << true << endl
-                << s.name << endl
-                << s.number_of_guild << endl
-                << s.number_of_working_guild << endl
-                << s.effectiveness << endl;
-            cout << "station successfully saved to file" << endl;
-        }
-        else {
-            fout << false << endl;
-            cout << "no station to save" << endl;
-        }
-        fout.close();
-    }
-    else cout << "file is not open" << endl;
+void save_pipe_to_file(ofstream& fout, const oil_pipe& p) {
+    fout << p.name << endl
+      << p.lenght << endl
+      << p.diameter << endl
+      << p.reparied << endl;
 }
 
-void load_from_file(oil_pipe& p, oil_pumping_station& s, bool& is_pipe, bool& is_station) {
-    bool is_pipe_in_file;
-    bool is_station_in_file;
-    int command = 1;
-    string a;
-    ifstream fin("pipe_and_station.txt");
-    if (!fin.is_open()) {
-        cout << "File is not open(the file may not exist)" << endl;
-        return;
-    }
-    fin >> is_pipe_in_file;
-    if (is_pipe_in_file) {
-        if (is_pipe) {
-            cout << "Do you want to overwrite pipe? (0 - no, 1 - yes)" << endl;
-            do {
-                cin.clear();
-                cin.ignore(1000, '\n');
-                cin >> command;
-            } while (cin.fail() || (command != 0 && command != 1));
-        }
-        if (command == 1) {
-            is_pipe = true;
-            //getline(fin, p.name);
+void save_station_to_file(ofstream& fout, const oil_pumping_station& s) {
+    fout << s.name << endl
+    << s.number_of_guild << endl
+    << s.number_of_working_guild << endl
+    << s.effectiveness << endl;
+}
+
+void load_from_file(vector<oil_pipe>& pipes, vector<oil_pumping_station>& stations) {
+    int counter;
+    oil_pipe p;
+    oil_pumping_station s;
+    ifstream fin;
+    string str;
+    fin.open("pipe_and_station.txt", ios::in);
+    if (fin.is_open()) {
+        fin >> counter;
+        for (int i = counter; i > 0; i--) {
             fin >> p.name;
-            fin >> p.lenght;
-            fin >> p.diameter;
-            fin >> p.reparied;
+            fin >> p.lenght >> p.diameter >> p.reparied;
+            pipes.push_back(p);
         }
-        else {
-            for (int i = 0; i < 6; i++) {
-                fin >> a;
-            }
-
+        fin >> counter;
+        for (int i = counter; i > 0; i--) {
+            fin >> s.name;
+            fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
+            stations.push_back(s);
         }
-
     }
-     else cout << "no pipe in file" << endl;
-
-     command = 1;
-     fin >> is_station_in_file;
-     if (is_station_in_file) {
-         if (is_station) {
-             cout << "Do you want to overwrite station? (0 - no, 1 - yes)" << endl;
-             do {
-                 cin.clear();
-                 cin.ignore(1000, '\n');
-                 cin >> command;
-             } while (cin.fail() || (command != 0 && command != 1));
-         }
-         if (command == 1) {
-             is_station = true;
-             fin >> s.name;
-             fin >> s.number_of_guild;
-             fin >> s.number_of_working_guild;
-             fin >> s.effectiveness;
-         }
-         else {
-             for (int i = 0; i < 6; i++) {
-                 fin >> a;
-             }
-
-         }
-
-     }
-     else cout << "no station in file" << endl;
+    else cout << "File is not open. Maybe it doesn't exist" << endl;  
 }
 
 ostream& operator << (ostream& out, const oil_pipe& p) {
@@ -203,11 +141,18 @@ istream& operator >> (istream& in, oil_pumping_station& s) {
     return in;
 }
 
+template <typename S>
+S& select_object(vector<S>& x) {
+    cout << "Enter index" << endl;
+    unsigned int index = get_correct_number(1u, x.size());
+    return x[index-1];
+}
+
 void menu() {
     cout << "Menu" << endl
         << "1 - create oil pipe" << endl
         << "2 - create oil pumping station" << endl
-        << "3 - show all objects" << endl
+        << "3 - show objects" << endl
         << "4 - edit oil pipe" << endl
         << "5 - edit oil pumping station" << endl
         << "6 - save to file" << endl
@@ -217,10 +162,10 @@ void menu() {
 
 int main()
 {
-    oil_pipe p;
+    vector <oil_pipe> pipes;
+    vector <oil_pumping_station> stations;
     oil_pumping_station s;
-    bool is_pipe = false;
-    bool is_station = false;
+    oil_pipe p;
 
     while (true) {
         menu();
@@ -237,38 +182,65 @@ int main()
         switch (command) {
         case 1:
             cin >> p;
-            is_pipe = true;
+            pipes.push_back(p);
             break;
 
         case 2:
             cin >> s;
-            is_station = true;
+            stations.push_back(s);
             break;
 
         case 3:
-            if (is_pipe) cout << p;
-            else cout << "no pipe" << endl;
-            if (is_station) cout << s;
+            if (pipes.size() > 0) {
+                cout << "Pipe" << endl;
+                cout << select_object(pipes);
+            }
+            else cout << "no pipe" << endl; 
+            if (stations.size() > 0) {
+                cout << "Station" << endl;
+                cout << select_object(stations);
+            }
             else  cout << "no station" << endl;
             break;
 
         case 4:
-            if (is_pipe) edit_pipe(p);
+            if (pipes.size() > 0) edit_pipe(select_object(pipes));
             else cout << "no pipe" << endl;
             break;
 
         case 5:
-            if (is_station) edit_station(s);
+            if (stations.size() > 0) edit_station(select_object(stations));
             else cout << "no station" << endl;
             break;
 
         case 6:
-            if (is_pipe || is_station) save_to_file(p, s, is_pipe, is_station);
-            else cout << "no pipe, no station" << endl;
+            if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
+            else {
+                ofstream fout;
+                fout.open("pipe_and_station.txt", ios::out);
+                if (fout.is_open()) {
+                    fout << pipes.size() << endl;
+                    if (pipes.size() > 0) {
+                        for (oil_pipe p : pipes) save_pipe_to_file(fout, p);
+                        cout << "pipes successfully saved to file" << endl;
+                    }
+                    else cout << "no pipe to save" << endl;
+                    fout << stations.size() << endl;
+                    if (stations.size() > 0) {
+                        for (oil_pumping_station s : stations) save_station_to_file(fout, s);
+                        cout << "stations successfully saved to file" << endl;
+                    }
+                    else cout << "no station to save" << endl;
+                    fout.close();
+                }
+                else cout << "file is not open";
+            }
             break;
 
         case 7:
-            load_from_file(p, s, is_pipe, is_station);
+            cout << "The data from the file will replace the existing data. Сontinue anyway? (0 - no, 1 - yes)" << endl;
+            command = get_correct_number(0, 1);
+            if (command) load_from_file(pipes, stations);
             break;
 
         case 0: return 0;
@@ -276,5 +248,3 @@ int main()
     }
     return 0;
 }
-
-//вывод с гетлайном из файла
