@@ -6,55 +6,55 @@
 #include "CStation.h"
 using namespace std;
 
-void edit_pipe(CPipe& p) {
-    p.reparied = !p.reparied;
-    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << p.reparied << endl;
-}
-
-void edit_station(CStation& s) {
-        int command;
-        cout << "Number of working guild" << endl;
-        s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
-        cout << "Number of working guild: " << s.number_of_working_guild << endl;
-}
-
-void save_pipe_to_file(ofstream& fout, const CPipe& p) {
-    fout << p.name << endl
-      << p.lenght << endl
-      << p.diameter << endl
-      << p.reparied << endl;
-}
-
-void save_station_to_file(ofstream& fout, const CStation& s) {
-    fout << s.name << endl
-    << s.number_of_guild << endl
-    << s.number_of_working_guild << endl
-    << s.effectiveness << endl;
-}
-
-void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
-    int counter;
-    CPipe p;
-    CStation s;
-    ifstream fin;
-    string str;
-    fin.open("pipe_and_station.txt", ios::in);
-    if (fin.is_open()) {
-        fin >> counter;
-        for (int i = counter; i > 0; i--) {
-            fin >> p.name;
-            fin >> p.lenght >> p.diameter >> p.reparied;
-            pipes.push_back(p);
-        }
-        fin >> counter;
-        for (int i = counter; i > 0; i--) {
-            fin >> s.name;
-            fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
-            stations.push_back(s);
-        }
-    }
-    else cout << "File is not open. Maybe it doesn't exist" << endl;  
-}
+//void edit_pipe(CPipe& p) {
+//    p.reparied = !p.reparied;
+//    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << p.reparied << endl;
+//}
+//
+//void edit_station(CStation& s) {
+//        int command;
+//        cout << "Number of working guild" << endl;
+//        s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
+//        cout << "Number of working guild: " << s.number_of_working_guild << endl;
+//}
+//
+//void save_pipe_to_file(ofstream& fout, const CPipe& p) {
+//    fout << p.name << endl
+//      << p.lenght << endl
+//      << p.diameter << endl
+//      << p.reparied << endl;
+//}
+//
+//void save_station_to_file(ofstream& fout, const CStation& s) {
+//    fout << s.name << endl
+//    << s.number_of_guild << endl
+//    << s.number_of_working_guild << endl
+//    << s.effectiveness << endl;
+//}
+//
+//void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
+//    int counter;
+//    CPipe p;
+//    CStation s;
+//    ifstream fin;
+//    string str;
+//    fin.open("pipe_and_station.txt", ios::in);
+//    if (fin.is_open()) {
+//        fin >> counter;
+//        for (int i = counter; i > 0; i--) {
+//            fin >> p.name;
+//            fin >> p.lenght >> p.diameter >> p.reparied;
+//            pipes.push_back(p);
+//        }
+//        fin >> counter;
+//        for (int i = counter; i > 0; i--) {
+//            fin >> s.name;
+//            fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
+//            stations.push_back(s);
+//        }
+//    }
+//    else cout << "File is not open. Maybe it doesn't exist" << endl;  
+//}
 
 template <typename S>
 S& select_object(vector<S>& x) {
@@ -79,8 +79,6 @@ int main()
 {
     vector <CPipe> pipes;
     vector <CStation> stations;
-    CPipe p;
-    CStation s;
 
     while (true) {
         menu();
@@ -96,13 +94,15 @@ int main()
 
         switch (command) {
         case 1:
-            cin >> p;
-            pipes.push_back(p);
+        {CPipe p;
+        cin >> p;
+        pipes.push_back(p); }
             break;
 
         case 2:
-            cin >> s;
-            stations.push_back(s);
+        {CStation s;
+        cin >> s;
+        stations.push_back(s); }
             break;
 
         case 3:
@@ -118,7 +118,7 @@ int main()
             else  cout << "no station" << endl;
             break;
 
-        case 4:
+        /*case 4:
             if (pipes.size() > 0) edit_pipe(select_object(pipes));
             else cout << "no pipe" << endl;
             break;
@@ -156,7 +156,7 @@ int main()
             cout << "The data from the file will replace the existing data. Сontinue anyway? (0 - no, 1 - yes)" << endl;
             command = get_correct_number(0, 1);
             if (command) load_from_file(pipes, stations);
-            break;
+            break;*/
 
         case 0: return 0;
         }

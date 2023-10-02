@@ -5,8 +5,16 @@
 
 using namespace std;
 
+int CPipe::MaxId = 0;
+
+CPipe::CPipe()
+{
+    id = MaxId++;
+}
+
 ostream& operator << (ostream& out, const CPipe& p) {
-    out << "Name: " << p.name
+    out <<"Id: " << p.id
+        << "Name: " << p.name
         << "\tLenght: " << p.lenght
         << "\tDiameter: " << p.diameter
         << "\tReparied: " << p.reparied << endl;
@@ -22,6 +30,6 @@ istream& operator >> (istream& in, CPipe& p) {
     cout << "Diameter" << endl;
     p.diameter = get_correct_number(1, 1000);
     cout << "Is reparied (1 - yes, 0 - no): " << endl;
-    p.reparied = get_correct_bool();
+    p.reparied = get_correct_number(0, 1);
     return in;
 }

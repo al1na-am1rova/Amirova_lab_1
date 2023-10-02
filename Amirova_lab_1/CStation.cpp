@@ -3,9 +3,17 @@
 #include <string>
 #include "utils.h"
 
+int CStation::MaxId = 0;
+
+CStation::CStation()
+{
+    id = MaxId++;
+}
+
 std::ostream& operator<<(std::ostream& out, const CStation& s)
 {
-    out << "Name: " << s.name
+    out <<"Id: " << s.id
+        << "\tName: " << s.name
         << "\tNumber of guild: " << s.number_of_guild
         << "\tNumber of working guild: " << s.number_of_working_guild
         << "\tEffectiveness: " << s.effectiveness << std::endl;
