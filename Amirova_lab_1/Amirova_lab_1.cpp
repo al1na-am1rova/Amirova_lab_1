@@ -2,81 +2,40 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
+#include "CPipe.h"
+#include "CStation.h"
 using namespace std;
 
-struct oil_pipe
-{
-    string name;
-    double lenght;
-    int diameter;
-    bool reparied;
-};
-
-struct oil_pumping_station
-{
-    string name;
-    int number_of_guild;
-    int number_of_working_guild;
-    float effectiveness;
-
-};
-
-template <typename T>
-T get_correct_number (T min, T max){
-    T x;
-    do {
-        cout << "Type number (" << min << " - " << max << " ): ";
-        cin >> x;
-        if (cin.fail() || x > max || x < min) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-        }
-    } while (cin.fail() || x > max || x < min);
-    return x;
-}
-
-bool get_correct_bool() {
-    bool x;
-    do {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        cout << "Type (true - 1 /false - 0): ";
-        cin >> x;
-    } while (cin.fail());
-    return x;
-}
-
-void edit_pipe(oil_pipe& p) {
+void edit_pipe(CPipe& p) {
     p.reparied = !p.reparied;
     cout << "pipe status (1 - is reparied, 0 - is not reparied): " << p.reparied << endl;
 }
 
-void edit_station(oil_pumping_station& s) {
+void edit_station(CStation& s) {
         int command;
         cout << "Number of working guild" << endl;
         s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
         cout << "Number of working guild: " << s.number_of_working_guild << endl;
 }
 
-void save_pipe_to_file(ofstream& fout, const oil_pipe& p) {
+void save_pipe_to_file(ofstream& fout, const CPipe& p) {
     fout << p.name << endl
       << p.lenght << endl
       << p.diameter << endl
       << p.reparied << endl;
 }
 
-void save_station_to_file(ofstream& fout, const oil_pumping_station& s) {
+void save_station_to_file(ofstream& fout, const CStation& s) {
     fout << s.name << endl
     << s.number_of_guild << endl
     << s.number_of_working_guild << endl
     << s.effectiveness << endl;
 }
 
-void load_from_file(vector<oil_pipe>& pipes, vector<oil_pumping_station>& stations) {
+void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
     int counter;
-    oil_pipe p;
-    oil_pumping_station s;
+    CPipe p;
+    CStation s;
     ifstream fin;
     string str;
     fin.open("pipe_and_station.txt", ios::in);
@@ -95,50 +54,6 @@ void load_from_file(vector<oil_pipe>& pipes, vector<oil_pumping_station>& statio
         }
     }
     else cout << "File is not open. Maybe it doesn't exist" << endl;  
-}
-
-ostream& operator << (ostream& out, const oil_pipe& p) {
-    out << "Name: " << p.name
-        << "\tLenght: " << p.lenght
-        << "\tDiameter: " << p.diameter
-        << "\tReparied: " << p.reparied << endl;
-    return out;
-}
-
-ostream& operator << (ostream& out, const oil_pumping_station& s) {
-    out << "Name: " << s.name
-        << "\tNumber of guild: " << s.number_of_guild
-        << "\tNumber of working guild: " << s.number_of_working_guild
-        << "\tEffectiveness: " << s.effectiveness << endl;
-    return out;
-}
-
-istream& operator >> (istream& in, oil_pipe& p) {
-    cout << "Oil pipe" << endl;
-    cout << "Name: ";
-    in.ignore(1000, '\n');
-    getline(in, p.name);
-    cout << "Lenght" << endl;
-    p.lenght = get_correct_number(1.0, 1000.0);
-    cout << "Diameter" << endl;
-    p.diameter = get_correct_number(1, 1000);
-    cout << "Is reparied (1 - yes, 0 - no): " << endl;
-    p.reparied = get_correct_bool();
-    return in;
-}
-
-istream& operator >> (istream& in, oil_pumping_station& s) {
-    cout << "Oil station" << endl;
-    cout << "Name: ";
-    cin.ignore(1000, '\n');
-    getline(cin, s.name);
-    cout << "Number of guild" << endl;
-    s.number_of_guild = get_correct_number(1, 1000);
-    cout << "Number of working guild" << endl;
-    s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
-    cout << "Effectiveness" << endl;
-    s.effectiveness = get_correct_number(0, 100);
-    return in;
 }
 
 template <typename S>
@@ -162,10 +77,10 @@ void menu() {
 
 int main()
 {
-    vector <oil_pipe> pipes;
-    vector <oil_pumping_station> stations;
-    oil_pumping_station s;
-    oil_pipe p;
+    vector <CPipe> pipes;
+    vector <CStation> stations;
+    CPipe p;
+    CStation s;
 
     while (true) {
         menu();
@@ -221,13 +136,13 @@ int main()
                 if (fout.is_open()) {
                     fout << pipes.size() << endl;
                     if (pipes.size() > 0) {
-                        for (oil_pipe p : pipes) save_pipe_to_file(fout, p);
+                        for (CPipe p : pipes) save_pipe_to_file(fout, p);
                         cout << "pipes successfully saved to file" << endl;
                     }
                     else cout << "no pipe to save" << endl;
                     fout << stations.size() << endl;
                     if (stations.size() > 0) {
-                        for (oil_pumping_station s : stations) save_station_to_file(fout, s);
+                        for (CStation s : stations) save_station_to_file(fout, s);
                         cout << "stations successfully saved to file" << endl;
                     }
                     else cout << "no station to save" << endl;
@@ -248,3 +163,5 @@ int main()
     }
     return 0;
 }
+
+//чтение из файла getline
