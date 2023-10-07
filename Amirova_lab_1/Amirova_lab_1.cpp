@@ -6,43 +6,45 @@
 #include "CStation.h"
 using namespace std;
 
-//void save_pipe_to_file(ofstream& fout, const CPipe& p) {
-//    fout << p.name << endl
-//      << p.lenght << endl
-//      << p.diameter << endl
-//      << p.reparied << endl;
-//}
-//
-//void save_station_to_file(ofstream& fout, const CStation& s) {
-//    fout << s.name << endl
-//    << s.number_of_guild << endl
-//    << s.number_of_working_guild << endl
-//    << s.effectiveness << endl;
-//}
-//
-//void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
-//    int counter;
-//    CPipe p;
-//    CStation s;
-//    ifstream fin;
-//    string str;
-//    fin.open("pipe_and_station.txt", ios::in);
-//    if (fin.is_open()) {
-//        fin >> counter;
-//        for (int i = counter; i > 0; i--) {
-//            fin >> p.name;
-//            fin >> p.lenght >> p.diameter >> p.reparied;
-//            pipes.push_back(p);
-//        }
-//        fin >> counter;
-//        for (int i = counter; i > 0; i--) {
-//            fin >> s.name;
-//            fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
-//            stations.push_back(s);
-//        }
-//    }
-//    else cout << "File is not open. Maybe it doesn't exist" << endl;  
-//}
+void save_pipe_to_file(ofstream& fout, const CPipe& p) {
+    fout << p.name << endl
+      << p.lenght << endl
+      << p.diameter << endl
+      << p.reparied << endl;
+}
+
+void save_station_to_file(ofstream& fout, const CStation& s) {
+    fout << s.name << endl
+    << s.number_of_guild << endl
+    << s.number_of_working_guild << endl
+    << s.effectiveness << endl;
+}
+
+void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
+    int counter;
+    CPipe p;
+    CStation s;
+    ifstream fin;
+    string str;
+    fin.open("pipe_and_station.txt", ios::in);
+    if (fin.is_open()) {
+        fin >> counter;
+        for (int i = counter; i > 0; i--) {
+            fin.ignore();
+            getline(fin, p.name);
+            fin >> p.lenght >> p.diameter >> p.reparied;
+            pipes.push_back(p);
+        }
+        fin >> counter;
+        for (int i = counter; i > 0; i--) {
+            fin.ignore();
+            getline(fin, s.name);
+            fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
+            stations.push_back(s);
+        }
+    }
+    else cout << "File is not open. Maybe it doesn't exist" << endl;  
+}
 
 template <typename T>
 T& select_object(vector<T>& x) {
@@ -97,9 +99,9 @@ bool check_by_reparied(const CPipe& s, bool param)
     return s.reparied == param;
 }
 
-bool check_by_working_guilds(const CStation& s, int mn)
+bool check_by_working_guilds(const CStation& s, int mx)
 {
-    return (1 - (s.number_of_working_guild / s.number_of_guild)) * 100 <= mn;
+    return (1 - (s.number_of_working_guild / s.number_of_guild)) * 100 >= mx;
 }
 
 void menu() {
@@ -112,7 +114,7 @@ void menu() {
         << "6 - save to file" << endl
         << "7 - load from file" << endl
         << "8 - find pipe by filter " << endl
-        << "9 - find station by filter " << endl
+        << "10 - show all objects " << endl
         << "0 - exit" << endl;
 }
 
@@ -125,7 +127,7 @@ int main()
         menu();
         int command;
         cin >> command;
-        if (cin.fail() || command < 0 || command > 9)
+        if (cin.fail() || command < 0 || command > 10)
         {
             cout << "Error: Invalid input. Please enter a number between 0 and 7" << endl;
             cin.clear();
@@ -160,7 +162,24 @@ int main()
             break;
 
         case 4:
-            if (pipes.size() > 0) (select_object(pipes)).edit_pipe();
+            int command;
+            if (pipes.size() > 0) {
+                cout << "Edit all pipes - 0, choose pipes to edit - 1" << endl;
+                cin >> command;
+                if (command) {
+                    while (true) {
+                        cout << "0 - stop, 1 - continue" << endl;
+                        cout << "Pipe name: " << command << " ";
+                        if (command) (select_object(pipes)).edit_pipe();
+                        else break;
+                    }
+
+                }
+                else for (auto i : pipes) {
+                    cout << i.name;
+                    i.edit_pipe();
+                }
+            }
             else cout << "no pipe" << endl;
             break;
 
@@ -169,7 +188,7 @@ int main()
             else cout << "no station" << endl;
             break;
 
-        /*case 6:
+       case 6:
             if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
             else {
                 ofstream fout;
@@ -194,10 +213,12 @@ int main()
             break;
 
         case 7:
-            cout << "The data from the file will replace the existing data. Сontinue anyway? (0 - no, 1 - yes)" << endl;
+            cout << "The data from the file will replace the existing data. Continue anyway? (0 - no, 1 - yes)" << endl;
             command = get_correct_number(0, 1);
-            if (command) load_from_file(pipes, stations);
-            break;*/
+            if (command) {
+                load_from_file(pipes, stations);
+            }
+            break;
 
         case 8 :
         {   
@@ -232,13 +253,13 @@ int main()
             }
             string name;
             int command;
-            int mn;
+            int mx;
             cout << "Find station by name - 0, find station by percentage of working guilds - 1 :" << endl;
             command = get_correct_number(0, 1);
             if (command) {
-                cout << "Enter acceptable minimum of working guilds. The program will show stations with a smaller percentage of working guilds" << endl;
-                mn = get_correct_number(0, 100);
-                for (int i : find_station_by_filter(stations, check_by_working_guilds, mn))
+                cout << "Enter acceptable maximum of not working guilds. The program will show stations with a higher percentage of not working guilds" << endl;
+                mx = get_correct_number(0, 100);
+                for (int i : find_station_by_filter(stations, check_by_working_guilds, mx))
                     cout << stations[i];
             }
             else {
@@ -249,10 +270,24 @@ int main()
             }
             break;
         }
+        case 10:
+        {
+            if (pipes.size() > 0) {
+                cout << "Pipes" << endl;
+                for (auto i : pipes) cout << i;
+            }
+            else cout << "no pipes" << endl;
+            if (stations.size() > 0) {
+                cout << "Stations" << endl;
+                for (auto i : stations) cout << i;
+            }
+            else cout << "no stations" << endl;
+            break;
+        }
         case 0: return 0;
         }
     }
     return 0;
 }
 
-//чтение из файла getline
+// загрузка из файла удалять значения или нет 
