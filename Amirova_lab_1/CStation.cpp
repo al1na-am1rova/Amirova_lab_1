@@ -10,6 +10,14 @@ CStation::CStation()
     id = MaxId++;
 }
 
+void CStation::edit_station()
+{
+        int command;
+        std::cout << "Enter umber of working guild" << std::endl;
+        number_of_working_guild = get_correct_number(0, number_of_guild);
+        std::cout << "Number of working guild: " << number_of_working_guild << std::endl;
+}
+
 std::ostream& operator<<(std::ostream& out, const CStation& s)
 {
     out <<"Id: " << s.id

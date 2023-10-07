@@ -6,18 +6,6 @@
 #include "CStation.h"
 using namespace std;
 
-//void edit_pipe(CPipe& p) {
-//    p.reparied = !p.reparied;
-//    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << p.reparied << endl;
-//}
-//
-//void edit_station(CStation& s) {
-//        int command;
-//        cout << "Number of working guild" << endl;
-//        s.number_of_working_guild = get_correct_number(0, s.number_of_guild);
-//        cout << "Number of working guild: " << s.number_of_working_guild << endl;
-//}
-//
 //void save_pipe_to_file(ofstream& fout, const CPipe& p) {
 //    fout << p.name << endl
 //      << p.lenght << endl
@@ -56,11 +44,62 @@ using namespace std;
 //    else cout << "File is not open. Maybe it doesn't exist" << endl;  
 //}
 
-template <typename S>
-S& select_object(vector<S>& x) {
+template <typename T>
+T& select_object(vector<T>& x) {
     cout << "Enter index" << endl;
     unsigned int index = get_correct_number(1u, x.size());
     return x[index-1];
+}
+
+
+template<typename T>
+using PFilter = bool(*)(const CPipe& s, T param);
+
+template<typename T>
+using SFilter = bool(*)(const CStation& s, T param);
+
+template <typename T>
+vector<int> find_pipe_by_filter(const vector<CPipe>& objects, PFilter<T> f, T param) {
+    vector<int> res;
+    int i = 0;
+    for (auto& s : objects)
+    {
+        if (f(s, param))
+            res.push_back(i);
+        i++;
+    }
+    if (res.size() == 0) cout << "no pipes with such parameters" << endl;
+    return res;
+}
+
+template <typename T>
+vector<int> find_station_by_filter(const vector<CStation>& objects, SFilter<T> f, T param) {
+    vector<int> res;
+    int i = 0;
+    for (auto& s : objects)
+    {
+        if (f(s, param))
+            res.push_back(i);
+        i++;
+    }
+    if (res.size() == 0) cout << "no stations with such parameters" << endl;
+    return res;
+}
+
+template<typename T>
+bool check_by_name(const T& s, string param)
+{
+    return s.name == param;
+}
+
+bool check_by_reparied(const CPipe& s, bool param)
+{
+    return s.reparied == param;
+}
+
+bool check_by_working_guilds(const CStation& s, int mn)
+{
+    return (1 - (s.number_of_working_guild / s.number_of_guild)) * 100 <= mn;
 }
 
 void menu() {
@@ -72,6 +111,8 @@ void menu() {
         << "5 - edit oil pumping station" << endl
         << "6 - save to file" << endl
         << "7 - load from file" << endl
+        << "8 - find pipe by filter " << endl
+        << "9 - find station by filter " << endl
         << "0 - exit" << endl;
 }
 
@@ -84,7 +125,7 @@ int main()
         menu();
         int command;
         cin >> command;
-        if (cin.fail() || command < 0 || command > 7)
+        if (cin.fail() || command < 0 || command > 9)
         {
             cout << "Error: Invalid input. Please enter a number between 0 and 7" << endl;
             cin.clear();
@@ -118,17 +159,17 @@ int main()
             else  cout << "no station" << endl;
             break;
 
-        /*case 4:
-            if (pipes.size() > 0) edit_pipe(select_object(pipes));
+        case 4:
+            if (pipes.size() > 0) (select_object(pipes)).edit_pipe();
             else cout << "no pipe" << endl;
             break;
 
         case 5:
-            if (stations.size() > 0) edit_station(select_object(stations));
+            if (stations.size() > 0) (select_object(stations)).edit_station();
             else cout << "no station" << endl;
             break;
 
-        case 6:
+        /*case 6:
             if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
             else {
                 ofstream fout;
@@ -158,6 +199,56 @@ int main()
             if (command) load_from_file(pipes, stations);
             break;*/
 
+        case 8 :
+        {   
+            if (pipes.size() == 0) {
+                cout << "no pipes" << endl;
+                continue;
+            }
+            string name;
+            int command;
+            bool status;
+            cout << "Find pipe by name - 0, find pipe by reparied status - 1 :" << endl;
+            command = get_correct_number(0, 1);
+            if (command) {
+                cout << "Enter reparied status (0 - no, 1 - yes): " << endl;
+                cin >> status;
+                for (int i : find_pipe_by_filter(pipes, check_by_reparied, status))
+                    cout << pipes[i];
+            }
+            else {
+                cout << "Enter name: " << endl;
+                cin >> name;
+                for (int i : find_pipe_by_filter(pipes, check_by_name, name))
+                    cout << pipes[i];
+            }
+            break;
+        }
+        case 9 : 
+        {
+            if (stations.size() == 0) {
+                cout << "no stations" << endl;
+                continue;
+            }
+            string name;
+            int command;
+            int mn;
+            cout << "Find station by name - 0, find station by percentage of working guilds - 1 :" << endl;
+            command = get_correct_number(0, 1);
+            if (command) {
+                cout << "Enter acceptable minimum of working guilds. The program will show stations with a smaller percentage of working guilds" << endl;
+                mn = get_correct_number(0, 100);
+                for (int i : find_station_by_filter(stations, check_by_working_guilds, mn))
+                    cout << stations[i];
+            }
+            else {
+                cout << "Enter name: " << endl;
+                cin >> name;
+                for (int i : find_station_by_filter(stations, check_by_name, name))
+                    cout << stations[i];
+            }
+            break;
+        }
         case 0: return 0;
         }
     }

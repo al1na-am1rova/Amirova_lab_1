@@ -12,9 +12,15 @@ CPipe::CPipe()
     id = MaxId++;
 }
 
+void CPipe :: edit_pipe()
+{
+    reparied = !reparied;
+    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << reparied << endl;
+}
+
 ostream& operator << (ostream& out, const CPipe& p) {
     out <<"Id: " << p.id
-        << "Name: " << p.name
+        << "\tName: " << p.name
         << "\tLenght: " << p.lenght
         << "\tDiameter: " << p.diameter
         << "\tReparied: " << p.reparied << endl;

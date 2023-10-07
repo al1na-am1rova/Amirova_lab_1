@@ -16,5 +16,6 @@ public:
 
     friend std::ostream& operator << (std::ostream& out, const CStation& s);
     friend std::istream& operator >> (std::istream& in, CStation& s);
+    void edit_station();
 };
 
