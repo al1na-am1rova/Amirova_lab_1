@@ -13,14 +13,14 @@ CStation::CStation()
 void CStation::edit_station()
 {
         int command;
-        std::cout << "Enter umber of working guild" << std::endl;
+        std::cout << "Enter number of working guild" << std::endl;
         number_of_working_guild = get_correct_number(0, number_of_guild);
-        std::cout << "Number of working guild: " << number_of_working_guild << std::endl;
+        std::cout << "Station name: " << name << "  Number of working guild: " << number_of_working_guild << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& out, const CStation& s)
 {
-    out <<"Id: " << s.id
+    out << "Id: " << s.id
         << "\tName: " << s.name
         << "\tNumber of guild: " << s.number_of_guild
         << "\tNumber of working guild: " << s.number_of_working_guild
@@ -42,3 +42,4 @@ std::istream& operator>>(std::istream& in, CStation& s)
     s.effectiveness = get_correct_number(0, 100);
     return in;
 }
+

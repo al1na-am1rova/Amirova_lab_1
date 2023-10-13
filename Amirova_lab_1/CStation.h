@@ -4,8 +4,8 @@
 
 class CStation
 {
-    int id;
 public:
+    int id;
     static int MaxId;
     std::string name;
     int number_of_guild;

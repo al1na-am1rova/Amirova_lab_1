@@ -14,12 +14,12 @@ CPipe::CPipe()
 
 void CPipe :: edit_pipe()
 {
-    reparied = !reparied;
-    cout << "pipe status (1 - is reparied, 0 - is not reparied): " << reparied << endl;
+    reparied = !  reparied;
+    cout << "Pipe name: " << name << "  Pipe status: (1 - is reparied, 0 - is not reparied): " << reparied << endl;
 }
 
 ostream& operator << (ostream& out, const CPipe& p) {
-    out <<"Id: " << p.id
+    out << "Id: " << p.id
         << "\tName: " << p.name
         << "\tLenght: " << p.lenght
         << "\tDiameter: " << p.diameter

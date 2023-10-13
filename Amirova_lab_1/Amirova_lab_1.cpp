@@ -2,34 +2,51 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include<set>
 #include "CPipe.h"
 #include "CStation.h"
 using namespace std;
 
-void save_pipe_to_file(ofstream& fout, const CPipe& p) {
-    fout << p.name << endl
-      << p.lenght << endl
-      << p.diameter << endl
-      << p.reparied << endl;
-}
-
-void save_station_to_file(ofstream& fout, const CStation& s) {
-    fout << s.name << endl
-    << s.number_of_guild << endl
-    << s.number_of_working_guild << endl
-    << s.effectiveness << endl;
-}
+void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) {
+        ofstream fout;
+        fout.open("pipe_and_station.txt", ios::out);
+        if (fout.is_open()) {
+            fout << pipes.size() << endl;
+            if (pipes.size() > 0) {
+                for (CPipe p : pipes) {
+                    fout << p.name << endl
+                        << p.lenght << endl
+                        << p.diameter << endl
+                        << p.reparied << endl;
+                };
+                cout << "pipes successfully saved to file" << endl;
+            }
+            else cout << "no pipe to save" << endl;
+            fout << stations.size() << endl;
+            if (stations.size() > 0) {
+                for (CStation s : stations) {
+                    fout << s.name << endl
+                        << s.number_of_guild << endl
+                        << s.number_of_working_guild << endl
+                        << s.effectiveness << endl;
+                }
+                cout << "stations successfully saved to file" << endl;
+            }
+            else cout << "no station to save" << endl;
+            fout.close();
+        }
+        else cout << "file is not open";
+        }
 
 void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
     int counter;
-    CPipe p;
-    CStation s;
     ifstream fin;
     string str;
     fin.open("pipe_and_station.txt", ios::in);
     if (fin.is_open()) {
         fin >> counter;
         for (int i = counter; i > 0; i--) {
+            CPipe p;
             fin.ignore();
             getline(fin, p.name);
             fin >> p.lenght >> p.diameter >> p.reparied;
@@ -37,6 +54,7 @@ void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
         }
         fin >> counter;
         for (int i = counter; i > 0; i--) {
+            CStation s;
             fin.ignore();
             getline(fin, s.name);
             fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
@@ -46,13 +64,27 @@ void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
     else cout << "File is not open. Maybe it doesn't exist" << endl;  
 }
 
-template <typename T>
-T& select_object(vector<T>& x) {
-    cout << "Enter index" << endl;
-    unsigned int index = get_correct_number(1u, x.size());
-    return x[index-1];
+CPipe& select_pipe(vector<CPipe>& pipes) {
+    cout << "Enter id: " << endl;
+    int id = get_correct_number(0, CPipe :: MaxId);
+    for (auto i:pipes) if (i.id == id) return i;
 }
 
+CStation& select_station(vector<CStation>& stations) {
+    cout << "Enter id" << endl;
+    int id = get_correct_number(0, CStation::MaxId);
+    for (auto& i : stations) if (i.id == id) return i;
+}
+
+template<typename T>
+void delete_object(vector<T>& objects, int id) {
+    for (int i; objects.size(); i ++) {
+        if (objects[i].id == id) {
+            objects.erase(i);
+            break;
+        }
+    }
+}
 
 template<typename T>
 using PFilter = bool(*)(const CPipe& s, T param);
@@ -108,13 +140,14 @@ void menu() {
     cout << "Menu" << endl
         << "1 - create oil pipe" << endl
         << "2 - create oil pumping station" << endl
-        << "3 - show objects" << endl
+        << "3 - show all objects" << endl
         << "4 - edit oil pipe" << endl
         << "5 - edit oil pumping station" << endl
         << "6 - save to file" << endl
         << "7 - load from file" << endl
         << "8 - find pipe by filter " << endl
-        << "10 - show all objects " << endl
+        << "9 - find station by filter " << endl
+        << "10 - delete object by index " << endl
         << "0 - exit" << endl;
 }
 
@@ -125,97 +158,70 @@ int main()
 
     while (true) {
         menu();
-        int command;
-        cin >> command;
-        if (cin.fail() || command < 0 || command > 10)
-        {
-            cout << "Error: Invalid input. Please enter a number between 0 and 7" << endl;
-            cin.clear();
-            cin.ignore(1000, '\n');
-            continue;
-        }
-
+        int command = get_correct_number(0, 10);
         switch (command) {
         case 1:
-        {CPipe p;
+        {
+        CPipe p;
         cin >> p;
         pipes.push_back(p); }
             break;
-
         case 2:
         {CStation s;
         cin >> s;
         stations.push_back(s); }
             break;
-
         case 3:
+        {
             if (pipes.size() > 0) {
-                cout << "Pipe" << endl;
-                cout << select_object(pipes);
+                cout << "Pipes" << endl;
+                for (auto i : pipes) cout << i;
             }
-            else cout << "no pipe" << endl; 
+            else cout << "no pipes" << endl;
             if (stations.size() > 0) {
-                cout << "Station" << endl;
-                cout << select_object(stations);
+                cout << "Stations" << endl;
+                for (auto i : stations) cout << i;
             }
-            else  cout << "no station" << endl;
+            else cout << "no stations" << endl;
             break;
+        }
 
         case 4:
-            int command;
-            if (pipes.size() > 0) {
-                cout << "Edit all pipes - 0, choose pipes to edit - 1" << endl;
-                cin >> command;
-                if (command) {
-                    while (true) {
-                        cout << "0 - stop, 1 - continue" << endl;
-                        cout << "Pipe name: " << command << " ";
-                        if (command) (select_object(pipes)).edit_pipe();
-                        else break;
+        {set<int> pipes_to_edit;
+        if (pipes.size() > 0) {
+            cout << "Edit all pipes - 0, choose pipes to edit - 1" << endl;
+            if (get_correct_number(0, 1)) {
+                while (true) {
+                    cout << "0 - stop, 1 - continue" << endl;
+                    if (get_correct_number(0, 1)) {
+                        cout << "Enter id: " << endl;
+                        pipes_to_edit.insert(get_correct_number(0, CPipe::MaxId));
                     }
-
+                    else break;
                 }
-                else for (auto i : pipes) {
-                    cout << i.name;
-                    i.edit_pipe();
-                }
+                for (auto i : pipes_to_edit) for (auto& j : pipes) if (j.id == i) j.edit_pipe();   
             }
-            else cout << "no pipe" << endl;
-            break;
+            else for (auto& i : pipes) i.edit_pipe();
+        }
+        else cout << "no pipe" << endl;
+        break; }
 
         case 5:
-            if (stations.size() > 0) (select_object(stations)).edit_station();
+            if (stations.size() > 0) (select_station(stations)).edit_station();
             else cout << "no station" << endl;
             break;
 
        case 6:
-            if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
-            else {
-                ofstream fout;
-                fout.open("pipe_and_station.txt", ios::out);
-                if (fout.is_open()) {
-                    fout << pipes.size() << endl;
-                    if (pipes.size() > 0) {
-                        for (CPipe p : pipes) save_pipe_to_file(fout, p);
-                        cout << "pipes successfully saved to file" << endl;
-                    }
-                    else cout << "no pipe to save" << endl;
-                    fout << stations.size() << endl;
-                    if (stations.size() > 0) {
-                        for (CStation s : stations) save_station_to_file(fout, s);
-                        cout << "stations successfully saved to file" << endl;
-                    }
-                    else cout << "no station to save" << endl;
-                    fout.close();
-                }
-                else cout << "file is not open";
-            }
+           if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
+           else save_to_file(pipes, stations);
             break;
 
         case 7:
             cout << "The data from the file will replace the existing data. Continue anyway? (0 - no, 1 - yes)" << endl;
             command = get_correct_number(0, 1);
             if (command) {
+                pipes.clear();
+                stations.clear();
                 load_from_file(pipes, stations);
             }
             break;
@@ -272,17 +278,21 @@ int main()
         }
         case 10:
         {
-            if (pipes.size() > 0) {
-                cout << "Pipes" << endl;
-                for (auto i : pipes) cout << i;
+            int id;
+            cout << "Delete pipe - 0, delete station - 1" << endl;
+            int command = get_correct_number(0, 1);
+            if (command && stations.size() > 0) {
+                cout << "Enter index" << endl;
+                id = get_correct_number(0, CStation::MaxId);
+                delete_object(stations, id);
             }
-            else cout << "no pipes" << endl;
-            if (stations.size() > 0) {
-                cout << "Stations" << endl;
-                for (auto i : stations) cout << i;
+            else cout << "no station" << endl;
+            if (!command && pipes.size() > 0) {
+                cout << "Enter index" << endl;
+                id = get_correct_number(0, CPipe::MaxId);
+                delete_object(pipes, id);
             }
-            else cout << "no stations" << endl;
-            break;
+            else cout << "no pipe" << endl;
         }
         case 0: return 0;
         }
@@ -290,4 +300,5 @@ int main()
     return 0;
 }
 
-// загрузка из файла удалять значения или нет 
+//разобраться с айди и индексом
+// удаление трубы и станции через деструктор?

@@ -4,8 +4,8 @@
 
 class CPipe
 {  
-    int id;
 public:
+    int id;
     static int MaxId;
     std::string name;
     double lenght;
