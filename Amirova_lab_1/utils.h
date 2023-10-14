@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 
 template <typename T>
 T get_correct_number(T min, T max)

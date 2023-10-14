@@ -9,7 +9,10 @@ using namespace std;
 
 void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) {
         ofstream fout;
-        fout.open("pipe_and_station.txt", ios::out);
+        string filename;
+        cout << "Enter file name" << endl;
+        cin >> filename;
+        fout.open(filename, ios::out);
         if (fout.is_open()) {
             fout << pipes.size() << endl;
             if (pipes.size() > 0) {
@@ -29,14 +32,17 @@ void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) 
             else cout << "no station to save" << endl;
             fout.close();
         }
-        else cout << "file is not open";
+        else cout << "File is not open. Maybe it doesn't exist." << endl;
         }
 
 void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
     int counter;
     ifstream fin;
     string str;
-    fin.open("pipe_and_station.txt", ios::in);
+    string filename;
+    cout << "Enter file name" << endl;
+    cin >> filename;
+    fin.open(filename, ios::in);
     if (fin.is_open()) {
         fin >> counter;
         for (int i = counter; i > 0; i--) {
