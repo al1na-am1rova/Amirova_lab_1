@@ -14,10 +14,7 @@ void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) 
             fout << pipes.size() << endl;
             if (pipes.size() > 0) {
                 for (CPipe p : pipes) {
-                    fout << p.name << endl
-                        << p.lenght << endl
-                        << p.diameter << endl
-                        << p.reparied << endl;
+                    fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
                 };
                 cout << "pipes successfully saved to file" << endl;
             }
@@ -25,10 +22,7 @@ void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) 
             fout << stations.size() << endl;
             if (stations.size() > 0) {
                 for (CStation s : stations) {
-                    fout << s.name << endl
-                        << s.number_of_guild << endl
-                        << s.number_of_working_guild << endl
-                        << s.effectiveness << endl;
+                    fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
                 }
                 cout << "stations successfully saved to file" << endl;
             }
@@ -66,24 +60,28 @@ void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
 
 CPipe& select_pipe(vector<CPipe>& pipes) {
     cout << "Enter id: " << endl;
-    int id = get_correct_number(0, CPipe :: MaxId);
+    int id = get_correct_number(0, CPipe :: MaxId - 1);
     for (auto i:pipes) if (i.id == id) return i;
 }
 
 CStation& select_station(vector<CStation>& stations) {
     cout << "Enter id" << endl;
-    int id = get_correct_number(0, CStation::MaxId);
+    int id = get_correct_number(0, CStation::MaxId - 1);
     for (auto& i : stations) if (i.id == id) return i;
 }
 
-template<typename T>
+template<typename T> 
 void delete_object(vector<T>& objects, int id) {
-    for (int i; objects.size(); i ++) {
+    auto it = objects.begin();
+    for (int i = 0; i < objects.size(); i++)
+    {
         if (objects[i].id == id) {
-            objects.erase(i);
-            break;
+            it = it + i;
+            objects.erase(it);
+            return;
         }
     }
+    cout << "there is no object with this id" << endl;
 }
 
 template<typename T>
@@ -147,7 +145,7 @@ void menu() {
         << "7 - load from file" << endl
         << "8 - find pipe by filter " << endl
         << "9 - find station by filter " << endl
-        << "10 - delete object by index " << endl
+        << "10 - delete object by id " << endl
         << "0 - exit" << endl;
 }
 
@@ -283,22 +281,20 @@ int main()
             int command = get_correct_number(0, 1);
             if (command && stations.size() > 0) {
                 cout << "Enter index" << endl;
-                id = get_correct_number(0, CStation::MaxId);
+                id = get_correct_number(0, CStation::MaxId-1);
                 delete_object(stations, id);
             }
-            else cout << "no station" << endl;
+            else if (command && stations.size() == 0) cout << "no station" << endl;
             if (!command && pipes.size() > 0) {
                 cout << "Enter index" << endl;
-                id = get_correct_number(0, CPipe::MaxId);
+                id = get_correct_number(0, CPipe::MaxId-1);
                 delete_object(pipes, id);
             }
-            else cout << "no pipe" << endl;
+            else if (!command && pipes.size() == 0) cout << "no pipe" << endl;
+            break;
         }
         case 0: return 0;
         }
     }
     return 0;
 }
-
-//разобраться с айди и индексом
-// удаление трубы и станции через деструктор?
