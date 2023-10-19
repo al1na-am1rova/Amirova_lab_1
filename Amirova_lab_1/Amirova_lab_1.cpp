@@ -8,32 +8,32 @@
 using namespace std;
 
 void save_to_file(const vector<CPipe>& pipes, const vector<CStation>& stations) {
-        ofstream fout;
-        string filename;
-        cout << "Enter file name" << endl;
-        cin >> filename;
-        fout.open(filename, ios::out);
-        if (fout.is_open()) {
-            fout << pipes.size() << endl;
-            if (pipes.size() > 0) {
-                for (CPipe p : pipes) {
-                    fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
-                };
-                cout << "pipes successfully saved to file" << endl;
-            }
-            else cout << "no pipe to save" << endl;
-            fout << stations.size() << endl;
-            if (stations.size() > 0) {
-                for (CStation s : stations) {
-                    fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
-                }
-                cout << "stations successfully saved to file" << endl;
-            }
-            else cout << "no station to save" << endl;
-            fout.close();
+    ofstream fout;
+    string filename;
+    cout << "Enter file name" << endl;
+    cin >> filename;
+    fout.open(filename, ios::out);
+    if (fout.is_open()) {
+        fout << pipes.size() << endl;
+        if (pipes.size() > 0) {
+            for (CPipe p : pipes) {
+                fout << p.name << endl << p.lenght << endl << p.diameter << endl << p.reparied << endl;
+            };
+            cout << "pipes successfully saved to file" << endl;
         }
-        else cout << "File is not open. Maybe it doesn't exist." << endl;
+        else cout << "no pipe to save" << endl;
+        fout << stations.size() << endl;
+        if (stations.size() > 0) {
+            for (CStation s : stations) {
+                fout << s.name << endl << s.number_of_guild << endl << s.number_of_working_guild << endl << s.effectiveness << endl;
+            }
+            cout << "stations successfully saved to file" << endl;
         }
+        else cout << "no station to save" << endl;
+        fout.close();
+    }
+    else cout << "File is not open. Maybe it doesn't exist." << endl;
+}
 
 void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
     int counter;
@@ -61,13 +61,13 @@ void load_from_file(vector<CPipe>& pipes, vector<CStation>& stations) {
             stations.push_back(s);
         }
     }
-    else cout << "File is not open. Maybe it doesn't exist" << endl;  
+    else cout << "File is not open. Maybe it doesn't exist" << endl;
 }
 
 CPipe& select_pipe(vector<CPipe>& pipes) {
     cout << "Enter id: " << endl;
-    int id = get_correct_number(0, CPipe :: MaxId - 1);
-    for (auto i:pipes) if (i.id == id) return i;
+    int id = get_correct_number(0, CPipe::MaxId - 1);
+    for (auto i : pipes) if (i.id == id) return i;
 }
 
 CStation& select_station(vector<CStation>& stations) {
@@ -76,7 +76,7 @@ CStation& select_station(vector<CStation>& stations) {
     for (auto& i : stations) if (i.id == id) return i;
 }
 
-template<typename T> 
+template<typename T>
 void delete_object(vector<T>& objects, int id) {
     auto it = objects.begin();
     for (int i = 0; i < objects.size(); i++)
@@ -135,9 +135,11 @@ bool check_by_reparied(const CPipe& s, bool param)
     return s.reparied == param;
 }
 
-bool check_by_working_guilds(const CStation& s, int mx)
+bool check_by_working_guilds(const CStation& s, double target)
 {
-    return (1 - (s.number_of_working_guild / s.number_of_guild)) * 100 >= mx;
+    double wg = s.number_of_working_guild;
+    double g = s.number_of_guild;
+    return ((g - wg)/g) * 100 == target;
 }
 
 void menu() {
@@ -166,15 +168,15 @@ int main()
         switch (command) {
         case 1:
         {
-        CPipe p;
-        cin >> p;
-        pipes.push_back(p); }
-            break;
+            CPipe p;
+            cin >> p;
+            pipes.push_back(p); }
+        break;
         case 2:
         {CStation s;
         cin >> s;
         stations.push_back(s); }
-            break;
+        break;
         case 3:
         {
             if (pipes.size() > 0) {
@@ -203,7 +205,7 @@ int main()
                     }
                     else break;
                 }
-                for (auto i : pipes_to_edit) for (auto& j : pipes) if (j.id == i) j.edit_pipe();   
+                for (auto i : pipes_to_edit) for (auto& j : pipes) if (j.id == i) j.edit_pipe();
             }
             else for (auto& i : pipes) i.edit_pipe();
         }
@@ -215,9 +217,9 @@ int main()
             else cout << "no station" << endl;
             break;
 
-       case 6:
-           if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
-           else save_to_file(pipes, stations);
+        case 6:
+            if (pipes.size() == 0 && stations.size() == 0) cout << "no pipe, no station" << endl;
+            else save_to_file(pipes, stations);
             break;
 
         case 7:
@@ -230,8 +232,8 @@ int main()
             }
             break;
 
-        case 8 :
-        {   
+        case 8:
+        {
             if (pipes.size() == 0) {
                 cout << "no pipes" << endl;
                 continue;
@@ -255,7 +257,7 @@ int main()
             }
             break;
         }
-        case 9 : 
+        case 9:
         {
             if (stations.size() == 0) {
                 cout << "no stations" << endl;
@@ -263,13 +265,12 @@ int main()
             }
             string name;
             int command;
-            int mx;
             cout << "Find station by name - 0, find station by percentage of working guilds - 1 :" << endl;
             command = get_correct_number(0, 1);
             if (command) {
-                cout << "Enter acceptable maximum of not working guilds. The program will show stations with a higher percentage of not working guilds" << endl;
-                mx = get_correct_number(0, 100);
-                for (int i : find_station_by_filter(stations, check_by_working_guilds, mx))
+                cout << "Enter percentage of not working guilds" << endl;
+                double target = get_correct_number(0.0, 100.0);
+                for (int i : find_station_by_filter(stations, check_by_working_guilds, target))
                     cout << stations[i];
             }
             else {
@@ -287,13 +288,13 @@ int main()
             int command = get_correct_number(0, 1);
             if (command && stations.size() > 0) {
                 cout << "Enter index" << endl;
-                id = get_correct_number(0, CStation::MaxId-1);
+                id = get_correct_number(0, CStation::MaxId - 1);
                 delete_object(stations, id);
             }
             else if (command && stations.size() == 0) cout << "no station" << endl;
             if (!command && pipes.size() > 0) {
                 cout << "Enter index" << endl;
-                id = get_correct_number(0, CPipe::MaxId-1);
+                id = get_correct_number(0, CPipe::MaxId - 1);
                 delete_object(pipes, id);
             }
             else if (!command && pipes.size() == 0) cout << "no pipe" << endl;
@@ -304,3 +305,9 @@ int main()
     }
     return 0;
 }
+
+//заменить вектор на мэп
+//слово длина неправильно написано))
+// редактирование труб убрать сет
+//вынести функции в файл утилс
+//вынести функции в файл трубы и станции

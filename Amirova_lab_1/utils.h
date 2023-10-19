@@ -7,8 +7,8 @@ T get_correct_number(T min, T max)
 {
 	T x;
 	while ((std::cin >> x).fail()
-		|| std::cin.peek() != '\n'	
-		|| x < min || x > max)		
+		|| std::cin.peek() != '\n'
+		|| x < min || x > max)
 	{
 		std::cin.clear();
 		std::cin.ignore(10000, '\n');
