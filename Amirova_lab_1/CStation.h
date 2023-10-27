@@ -1,5 +1,8 @@
 #pragma once
+#include <iostream>
 #include <string>
+#include <vector>
+#include <unordered_map>
 #include "utils.h"
 
 class CStation
@@ -17,5 +20,6 @@ public:
     friend std::ostream& operator << (std::ostream& out, const CStation& s);
     friend std::istream& operator >> (std::istream& in, CStation& s);
     void edit_station();
+    friend CStation& select_station(std::unordered_map<int, CStation>& stations);
 };
 

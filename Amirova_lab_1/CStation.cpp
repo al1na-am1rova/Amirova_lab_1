@@ -1,6 +1,8 @@
 #pragma once
+#include <iostream>
 #include "CStation.h"
 #include <string>
+#include <vector>
 #include "utils.h"
 
 int CStation::MaxId = 0;
@@ -41,5 +43,11 @@ std::istream& operator>>(std::istream& in, CStation& s)
     std::cout << "Effectiveness" << std::endl;
     s.effectiveness = get_correct_number(0, 100);
     return in;
+}
+
+CStation& select_station(std::unordered_map<int, CStation>& stations) {
+    std::cout << "Enter id" << std::endl;
+    int id = get_correct_number(0, CStation::MaxId - 1);
+    for (auto& i : stations) if (i.first == id) return i.second;
 }
 
