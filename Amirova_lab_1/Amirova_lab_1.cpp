@@ -40,11 +40,11 @@ using namespace std;
 //    return x;
 //}
 
-template<typename T>
-void erase(unordered_map<int, T>& objects, int id) {
-    if (objects.find(id) != objects.end()) objects.erase(objects.find(id));
-    else cout << "there is no object with this id" << endl;
-}
+//template<typename T>
+//void erase(unordered_map<int, T>& objects, int id) {
+//    if (objects.find(id) != objects.end()) objects.erase(objects.find(id));
+//    else cout << "there is no object with this id" << endl;
+//}
 
 //template<typename T>
 //using PFilter = bool(*)(const CPipe& s, T param);
@@ -52,44 +52,44 @@ void erase(unordered_map<int, T>& objects, int id) {
 //template<typename T>
 //using SFilter = bool(*)(const CStation& s, T param);
 
-template <typename T>
-unordered_map<int, CPipe> find_pipe_by_filter(const unordered_map<int, CPipe>& objects, PFilter<T> f, T param) {
-    unordered_map<int, CPipe> res;
-    for (auto s : objects) if (f(s.second, param)) res.insert({ s.first, s.second });
-    if (res.size() == 0) cout << "no pipes with such parameters" << endl;
-    return res;
-}
+//template <typename T>
+//unordered_map<int, CPipe> find_pipe_by_filter(const unordered_map<int, CPipe>& objects, PFilter<T> f, T param) {
+//    unordered_map<int, CPipe> res;
+//    for (auto s : objects) if (f(s.second, param)) res.insert({ s.first, s.second });
+//    if (res.size() == 0) cout << "no pipes with such parameters" << endl;
+//    return res;
+//}
 
-template <typename T>
-unordered_map<int, CStation> find_station_by_filter(const unordered_map<int, CStation>& objects, SFilter<T> f, T param) {
-    unordered_map<int, CStation> res;
-    for (auto& s : objects) if (f(s.second, param)) res.insert(s);
-    if (res.size() == 0) cout << "no stations with such parameters" << endl;
-    return res;
-}
+//template <typename T>
+//unordered_map<int, CStation> find_station_by_filter(const unordered_map<int, CStation>& objects, SFilter<T> f, T param) {
+//    unordered_map<int, CStation> res;
+//    for (auto& s : objects) if (f(s.second, param)) res.insert(s);
+//    if (res.size() == 0) cout << "no stations with such parameters" << endl;
+//    return res;
+//}
 
-template<typename T>
-bool check_by_name(const T& s, string param)
-{
-    bool found = s.name.find(param) != string::npos;
-    return found;
-}
-
-bool check_by_reparied(const CPipe& s, bool param)
-{
-    return s.reparied == param;
-}
-
-bool check_by_diameter(const CPipe& p, int param) {
-    return p.diameter == param;
-}
-
-bool check_by_working_guilds(const CStation& s, double target)
-{
-    double wg = s.number_of_working_guild;
-    double g = s.number_of_guild;
-    return ((g - wg)/g) * 100 == target;
-}
+//template<typename T>
+//bool check_by_name(const T& s, string param)
+//{
+//    bool found = s.name.find(param) != string::npos;
+//    return found;
+//}
+//
+//bool check_by_reparied(const CPipe& s, bool param)
+//{
+//    return s.reparied == param;
+//}
+//
+//bool check_by_diameter(const CPipe& p, int param) {
+//    return p.diameter == param;
+//}
+//
+//bool check_by_working_guilds(const CStation& s, double target)
+//{
+//    double wg = s.number_of_working_guild;
+//    double g = s.number_of_guild;
+//    return ((g - wg)/g) * 100 == target;
+//}
 
 template<typename T>
 void add_object(unordered_map<int, T>& objects) {
@@ -110,15 +110,12 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
     CSystem g;
     cout << "Oil Pipeline System" << endl;
     cout << "Enter id of entrance station: ";
-    g.entrance_id = get_correct_number(0, CStation::MaxId);
+    g.entrance_id = get_correct_entrance_id(stations);
     cout << "Enter id of exit station: " << endl;
-    while ((cin >> g.exit_id).fail()
-        || cin.peek() != '\n'
-        || g.exit_id < 0 || g.exit_id > CStation::MaxId || g.exit_id == g.entrance_id)
-    {
-        cin.clear();
-        cin.ignore(10000, '\n');
-        cout << "Type number (" << 0 << "-" << CStation::MaxId << ", input and output stations must be different ):"; 
+    g.exit_id = get_correct_exit_id(stations, g.entrance_id);
+    if (already_in_system(g.entrance_id, g.exit_id, system)) {
+        cout << "This stations are already connected" << endl;
+        return;
     }
     cout << "Enter diameter of of pipe: " << endl;
     int d = get_correct_d();
@@ -143,7 +140,7 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
     return;
 }
 
-void show_objects(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
+void show_objects(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& system) {
     if (pipes.size() > 0) {
         cout << "Pipes" << endl;
         for (auto& i : pipes) cout << i.second << endl;
@@ -154,6 +151,11 @@ void show_objects(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
         for (auto& i : stations) cout << i.second << endl;
     }
     else cout << "no stations" << endl;
+    if (system.size() > 0) {
+        cout << "Systems" << endl;
+        for (auto i : system) cout << i.second;
+    }
+    else cout << "no system" << endl;
 }
 
 void edit_pipes(unordered_map<int, CPipe>& pipes) {
@@ -248,7 +250,7 @@ void find_station(const unordered_map<int, CStation>& stations) {
     }
 }
 
-void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
+void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& systems) {
     if (pipes.size() == 0 && stations.size() == 0) {
         cout << "no pipe, no station" << endl;
         return;
@@ -275,12 +277,20 @@ void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
             cout << "stations successfully saved to file" << endl;
         }
         else cout << "no station to save" << endl;
+        fout << systems.size() << endl;
+        if (systems.size() > 0) {
+            for (auto g : systems) {
+                fout << g.second.entrance_id << endl << g.second.exit_id << endl << g.second.pipe_id << endl;
+            }
+            cout << "systems successfully saved to file" << endl;
+        }
+        else cout << "no system to save" << endl;
         fout.close();
     }
     else cout << "File is not open. Maybe it doesn't exist." << endl;
 }
 
-void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
+void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& systems) {
     if (pipes.size() > 0 || stations.size() > 0) {
         cout << "The data from the file will replace the existing data. Continue anyway? (0 - no, 1 - yes)" << endl;
         if (get_correct_number(0, 1)) {
@@ -312,6 +322,13 @@ void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStatio
             getline(fin, s.name);
             fin >> s.number_of_guild >> s.number_of_working_guild >> s.effectiveness;
             stations.insert({ s.id, s });
+        }
+        fin >> counter;
+        for (int i = counter; i > 0; i--) {
+            CSystem g;
+            fin.ignore();
+            fin >> g.entrance_id >> g.exit_id >> g.pipe_id;
+            systems.insert({ g.id, g });
         }
     }
     else cout << "File is not open. Maybe it doesn't exist" << endl;
@@ -350,7 +367,7 @@ int main()
             add_object(stations);
             break;
         case 3:
-            show_objects(pipes, stations);
+            show_objects(pipes, stations, systems);
             break;
         case 4:
             edit_pipes(pipes);
@@ -359,10 +376,10 @@ int main()
             edit_stations(stations);
             break;
         case 6:
-            save_to_file(pipes, stations);
+            save_to_file(pipes, stations, systems);
             break;
         case 7:
-            load_from_file(pipes, stations);
+            load_from_file(pipes, stations, systems);
             break;
         case 8:
             find_pipe(pipes);
@@ -383,6 +400,6 @@ int main()
 }
 
 // исправить ыункцию get_correct_d
-// проверка на существование системы
+// запись и чтение из фацла
 //удаляем трубу = удаляем и систему 
 
