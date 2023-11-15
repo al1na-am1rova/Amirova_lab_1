@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "utils.h"
 
 class CStation
 {
@@ -14,6 +13,9 @@ public:
     int number_of_guild;
     int number_of_working_guild;
     float effectiveness;
+
+    template <typename T>
+    friend T get_correct_number(T min, T max);
 
     CStation();
 

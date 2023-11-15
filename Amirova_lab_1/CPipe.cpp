@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include "utils.h"
 #include "CPipe.h"
+
 
 using namespace std;
 
@@ -11,6 +11,22 @@ int CPipe::MaxId = 0;
 CPipe::CPipe()
 {
     id = MaxId++;
+    in_system = false;
+}
+
+template <typename T>
+T get_correct_number(T min, T max)
+{
+    T x;
+    while ((cin >> x).fail()
+        || cin.peek() != '\n'
+        || x < min || x > max)
+    {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Type number (" << min << "-" << max << "):";
+    }
+    return x;
 }
 
 void CPipe :: edit_pipe()
@@ -35,7 +51,7 @@ int get_correct_diameter()
     {
         cin.clear();
         cin.ignore(10000, '\n');
-        cout << "Type number 500, 700, 1000 or 1400:";
+        cout << "Type number 500, 700, 1000 or 1400:" << endl;
     }
     return x;
 }
@@ -45,7 +61,8 @@ ostream& operator << (ostream& out, const CPipe& p) {
         << "\tName: " << p.name
         << "\tLength: " << p.length
         << "\tDiameter: " << p.diameter
-        << "\tReparied: " << p.reparied << endl;
+        << "\tReparied (1 - yes, 0 - no): " << p.reparied
+        << "\tIs in system (1 - yes, 0 - no): " << p.in_system << endl;
     return out;
 }
 

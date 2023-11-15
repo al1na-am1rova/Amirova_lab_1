@@ -1,11 +1,5 @@
 #pragma once
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include<set>
-#include "CPipe.h"
-#include "CStation.h"
 
 using namespace std;
 
@@ -24,12 +18,22 @@ T get_correct_number(T min, T max)
     return x;
 }
 
-template<typename T>
-void erase(unordered_map<int, T>& objects, int id) {
-    if (objects.find(id) != objects.end()) objects.erase(objects.find(id));
-    else cout << "there is no object with this id" << endl;
+int get_correct_d()
+{
+    int x;
+    while ((cin >> x).fail()
+        || cin.peek() != '\n'
+        || (x != 500 && x != 700 && x != 1000 && x != 1400))
+    {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Type number 500, 700, 1000 or 1400:" << endl;
+    }
+    return x;
 }
 
-void save_to_file(unordered_map<int, class CPipe>& pipes, unordered_map<int, class CStation>& stations);
+template<typename T>
+using PFilter = bool(*)(const CPipe& s, T param);
 
-void load_from_file(unordered_map<int, class CPipe>& pipes, unordered_map<int, class CStation>& stations);
+template<typename T>
+using SFilter = bool(*)(const CStation& s, T param);

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "utils.h"
+
 
 class CPipe
 {  
@@ -13,6 +13,11 @@ public:
     double length;
     int diameter;
     bool reparied;
+    bool in_system;
+
+    template <typename T>
+    friend T get_correct_number(T min, T max);
+    friend int get_correct_diameter();
 
     CPipe();
 
