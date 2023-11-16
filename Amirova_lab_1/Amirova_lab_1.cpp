@@ -11,86 +11,6 @@
 
 using namespace std;
 
-//template <typename T>
-//T get_correct_number(T min, T max)
-//{
-//    T x;
-//    while ((cin >> x).fail()
-//        || cin.peek() != '\n'
-//        || x < min || x > max)
-//    {
-//        cin.clear();
-//        cin.ignore(10000, '\n');
-//        cout << "Type number (" << min << "-" << max << "):";
-//    }
-//    return x;
-//}
-
-//int get_correct_d()
-//{
-//    int x;
-//    while ((cin >> x).fail()
-//        || cin.peek() != '\n'
-//        || (x != 500 && x != 700 && x != 1000 && x != 1400))
-//    {
-//        cin.clear();
-//        cin.ignore(10000, '\n');
-//        cout << "Type number 500, 700, 1000 or 1400:" << endl;
-//    }
-//    return x;
-//}
-
-//template<typename T>
-//void erase(unordered_map<int, T>& objects, int id) {
-//    if (objects.find(id) != objects.end()) objects.erase(objects.find(id));
-//    else cout << "there is no object with this id" << endl;
-//}
-
-//template<typename T>
-//using PFilter = bool(*)(const CPipe& s, T param);
-
-//template<typename T>
-//using SFilter = bool(*)(const CStation& s, T param);
-
-//template <typename T>
-//unordered_map<int, CPipe> find_pipe_by_filter(const unordered_map<int, CPipe>& objects, PFilter<T> f, T param) {
-//    unordered_map<int, CPipe> res;
-//    for (auto s : objects) if (f(s.second, param)) res.insert({ s.first, s.second });
-//    if (res.size() == 0) cout << "no pipes with such parameters" << endl;
-//    return res;
-//}
-
-//template <typename T>
-//unordered_map<int, CStation> find_station_by_filter(const unordered_map<int, CStation>& objects, SFilter<T> f, T param) {
-//    unordered_map<int, CStation> res;
-//    for (auto& s : objects) if (f(s.second, param)) res.insert(s);
-//    if (res.size() == 0) cout << "no stations with such parameters" << endl;
-//    return res;
-//}
-
-//template<typename T>
-//bool check_by_name(const T& s, string param)
-//{
-//    bool found = s.name.find(param) != string::npos;
-//    return found;
-//}
-//
-//bool check_by_reparied(const CPipe& s, bool param)
-//{
-//    return s.reparied == param;
-//}
-//
-//bool check_by_diameter(const CPipe& p, int param) {
-//    return p.diameter == param;
-//}
-//
-//bool check_by_working_guilds(const CStation& s, double target)
-//{
-//    double wg = s.number_of_working_guild;
-//    double g = s.number_of_guild;
-//    return ((g - wg)/g) * 100 == target;
-//}
-
 template<typename T>
 void add_object(unordered_map<int, T>& objects) {
     T obj;
@@ -98,11 +18,11 @@ void add_object(unordered_map<int, T>& objects) {
     objects.insert({ obj.id, obj });
 }
 
-void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& pipes, unordered_map<int, CStation> stations) {
-    if (pipes.size() == 0) {
+void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
+    /*if (pipes.size() == 0) {
         cout << "no pipe" << endl;
         return;
-    }
+    }*/
     if (stations.size() < 2) {
         cout << "not enough stations" << endl;
         return;
@@ -118,7 +38,7 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
         return;
     }
     cout << "Enter diameter of of pipe: " << endl;
-    int d = get_correct_d();
+    int d = get_correct_diam();
     for (auto& i : pipes) if (check_by_diameter(i.second, d) and i.second.in_system == false and i.second.reparied == false) {
         g.pipe_id = i.second.id;
         i.second.in_system = true;
@@ -129,9 +49,16 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
     cout << "no suitable pipe. Want to create a new pipe?(1- yes, 0 - no)" << endl;
     if (get_correct_number(0, 1)) {
         CPipe p;
-        cin >> p;
-        g.pipe_id = p.id;
+        cout << "Oil pipe" << endl;
+        cout << "Name: ";
+        cin.ignore(1000, '\n');
+        getline(cin, p.name);
+        cout << "Length" << endl;
+        p.length = get_correct_number(1.0, 1000.0);
+        p.diameter = d;
+        p.reparied = false;
         p.in_system = true;
+        g.pipe_id = p.id;
         pipes.insert({ p.id, p });
         system.insert({ g.id, g });
         cout << g << endl;
@@ -183,22 +110,36 @@ void edit_stations(unordered_map<int, CStation>& stations) {
     else cout << "no stations" << endl;
 }
 
-void delete_object(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
+void delete_object(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& systems) {
     int id;
-    cout << "Delete pipe - 0, delete station - 1" << endl;
-    int command = get_correct_number(0, 1);
-    if (command && stations.size() > 0) {
+    cout << "Delete pipe - 0, delete station - 1, delete system - 2 " << endl;
+    int command = get_correct_number(0, 2);
+    if (command == 1 && stations.size() > 0) {
         cout << "Enter id" << endl;
         id = get_correct_number(0, CStation::MaxId - 1);
+        if (is_station_in_system(id, systems) >= 0) {
+            cout << "the system containing this station will be deleted too" << endl;
+            erase_system(systems, is_station_in_system(id, systems),pipes);
+        }
         erase(stations, id);
     }
     else if (command && stations.size() == 0) cout << "no station" << endl;
-    if (!command && pipes.size() > 0) {
+    if (command == 0 && pipes.size() > 0) {
         cout << "Enter id" << endl;
         id = get_correct_number(0, CPipe::MaxId - 1);
+        if (is_pipe_in_system(id, systems) >= 0) {
+            cout << "the system containing this pipe will be deleted too" << endl;
+            erase_system(systems, is_pipe_in_system(id, systems),pipes);
+        }
         erase(pipes, id);
     }
     else if (!command && pipes.size() == 0) cout << "no pipe" << endl;
+    if (command == 2 && systems.size() > 0) {
+        cout << "Enter id" << endl;
+        id = get_correct_number(0, CSystem::MaxId - 1);
+        erase_system(systems, id, pipes);
+    }
+    else if (command == 2 && systems.size() == 0) cout << "no system" << endl;
 }
 
 void find_pipe(const unordered_map<int, CPipe>& pipes) {
@@ -264,7 +205,7 @@ void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
         fout << pipes.size() << endl;
         if (pipes.size() > 0) {
             for (auto& p : pipes) {
-                fout << p.second.name << endl << p.second.length << endl << p.second.diameter << endl << p.second.reparied << endl;
+                fout << p.second.name << endl << p.second.length << endl << p.second.diameter << endl << p.second.reparied << endl << p.second.in_system<< endl;
             };
             cout << "pipes successfully saved to file" << endl;
         }
@@ -279,7 +220,7 @@ void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
         else cout << "no station to save" << endl;
         fout << systems.size() << endl;
         if (systems.size() > 0) {
-            for (auto g : systems) {
+            for (auto& g : systems) {
                 fout << g.second.entrance_id << endl << g.second.exit_id << endl << g.second.pipe_id << endl;
             }
             cout << "systems successfully saved to file" << endl;
@@ -312,7 +253,7 @@ void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStatio
             CPipe p;
             fin.ignore();
             getline(fin, p.name);
-            fin >> p.length >> p.diameter >> p.reparied;
+            fin >> p.length >> p.diameter >> p.reparied >> p.in_system;
             pipes.insert({ p.id, p });
         }
         fin >> counter;
@@ -347,6 +288,7 @@ void menu() {
         << "9 - find station by filter " << endl
         << "10 - delete object by id " << endl
         << "11 - create Oil Pipeline System " << endl
+        << "12 - sort graph of systems " << endl
         << "0 - exit" << endl;
 }
 
@@ -358,7 +300,7 @@ int main()
 
     while (true) {
         menu();
-        int command = get_correct_number(0, 11);
+        int command = get_correct_number(0, 12);
         switch (command) {
         case 1:
             add_object(pipes);
@@ -388,10 +330,13 @@ int main()
             find_station(stations);
             break;
         case 10:
-            delete_object(pipes, stations);
+            delete_object(pipes, stations, systems);
             break;
         case 11:
             add_system(systems, pipes, stations);
+            break;
+        case 12:
+            sort_graph(systems);
             break;
         case 0: return 0;
         }
@@ -399,7 +344,6 @@ int main()
     return 0;
 }
 
-// исправить ыункцию get_correct_d
-// запись и чтение из фацла
-//удаляем трубу = удаляем и систему 
+// топологическая сортировка
+//логирование - ?
 

@@ -18,7 +18,7 @@ T get_correct_number(T min, T max)
     return x;
 }
 
-int get_correct_d()
+int get_correct_diam()
 {
     int x;
     while ((cin >> x).fail()
@@ -83,6 +83,14 @@ void erase(unordered_map<int, T>& objects, int id) {
     else cout << "there is no object with this id" << endl;
 }
 
+void erase_system(unordered_map<int, CSystem>& systems, int id, unordered_map<int, CPipe>& pipes) {
+    if (systems.find(id) != systems.end()) {
+        for (auto& i : systems) if (i.first == id) (pipes.at(i.second.pipe_id)).in_system=false;
+        systems.erase(systems.find(id));
+    }
+    else cout << "there is no object with this id" << endl;
+}
+
 bool is_correct_station_id(unordered_map<int, CStation> stations, int id) {
     for (auto i : stations) if (i.first == id) return true;
     return false;
@@ -117,4 +125,48 @@ int get_correct_exit_id(unordered_map<int, CStation> stations, int entrance_id) 
 bool already_in_system(int entrance_id, int exit_id, unordered_map<int, CSystem> systems) {
     for (auto i : systems) if (i.second.entrance_id == entrance_id and i.second.exit_id == exit_id) return true;
     return false;
+}
+
+int is_station_in_system(int id, unordered_map<int, CSystem> systems) {
+    for (auto i : systems) if (i.second.entrance_id == id || i.second.exit_id == id) return i.first;
+    return -1;
+}
+
+int is_pipe_in_system(int id, unordered_map<int, CSystem> systems) {
+    for (auto i : systems) if (i.second.pipe_id == id) return i.first;
+    return -1;
+}
+
+unordered_map<int, int> create_graph(unordered_map<int, CSystem>& systems) {
+    unordered_map<int, int> graph;
+    for (auto i : systems) graph.insert({ i.second.entrance_id, i.second.exit_id });
+    return graph;
+}
+
+//void dfs(vector<vector<int>> graph, int v, vector<int>& visited, vector<int>& order) {
+//    visited[v] = 1;
+//    for (int i : graph.at(v)) if (!visited[i]) dfs(graph, i, visited, order);
+//    order.push_back(v);
+//    return;
+//}
+
+void sort_graph(unordered_map<int, CSystem> systems) {
+    vector<vector<int>> graph = create_graph(systems);
+    vector<int> counter;
+    for (auto i : systems) {
+        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+    }
+ /*   for (auto i : graph) {
+        cout << i.first;
+        for (int j : i.second) cout << j << " ";
+        cout << endl;
+    }
+    cout << counter.size();*/
+   /* vector<int> visited(counter.size());
+    vector<int> order;
+    for (int v = 0; v < counter.size(); v++) if (!visited[v]) dfs(graph, v, visited, order);
+    reverse(order.begin(), order.end());
+    cout << "Result" << endl;
+    for (int v : order) cout << v << endl;*/
 }
