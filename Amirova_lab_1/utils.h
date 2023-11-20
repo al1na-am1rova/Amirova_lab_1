@@ -151,32 +151,41 @@ unordered_map<int, vector<int>> create_graph(unordered_map<int, CSystem>& system
     return graph;
 }
 
-void dfs(unordered_map<int, vector<int>>& graph, int v, vector<int>& visited, vector<int>& order) {
-    visited.push_back(v);
+void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>& visited, vector<int>& order, bool& flag) {
+    visited[v] = 1;
     if (graph.find(v) != graph.end()){
-        for (int i : graph.at(v)) if (find(visited.begin(), visited.end(), i) == visited.end()) {
-            dfs(graph, i, visited, order);
+        for (int i : graph.at(v)) {
+            if (visited[i] == 0) dfs(graph, i, visited, order, flag);
+            else if (visited[i] == 1) {
+                flag = false;
+            }
         }
     }
     order.push_back(v);
+    visited[v] = 2;
     return;
 }
 
 void sort_graph(unordered_map<int, CSystem> systems) {
+    bool flag = true;
     unordered_map<int, vector<int>> graph = create_graph(systems);
-    /*for (auto i : graph) cout << i.first << i.second[0] << "\t";*/
     vector<int> counter;
-    for (auto i : systems) {
+    for (auto& i : systems) {
         if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
         if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
     }
-    vector<int> visited;
+    unordered_map<int, int> visited;
+    /*vector<int> visited;*/
+    for (int i : counter) visited.insert({ i, 0 });
     vector<int> order;
     counter.pop_back();
-        /*for (auto i : counter) cout << i << "\t";*/
-    for (int v :counter) if (find(visited.begin(), visited.end(), v) == visited.end()) dfs(graph, v, visited, order);
-    reverse(order.begin(), order.end());
-    cout << "Result" << endl;
-    for (int v : order) cout << v << '\t';
-    cout << endl;
+    /*for (int v :counter) if (find(visited.begin(), visited.end(), v) == visited.end()) dfs(graph, v, visited, order);*/
+    for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
+    if (flag) {
+        reverse(order.begin(), order.end());
+        cout << "Result" << endl;
+        for (int v : order) cout << v << '\t';
+        cout << endl;
+    }
+    else cout << "Cycle in the graph. Topological sorting is not possible" << endl;
 }
