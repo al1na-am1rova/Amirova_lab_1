@@ -18,5 +18,6 @@ public:
 	friend T get_correct_number(T min, T max);
 	friend  ostream& operator << (ostream& out, const CSystem& g);
 	friend istream& operator >> (istream& in, CSystem& g);
+	string get_type();
 };
 

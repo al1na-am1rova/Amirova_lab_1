@@ -16,13 +16,14 @@ void add_object(unordered_map<int, T>& objects) {
     T obj;
     cin >> obj;
     objects.insert({ obj.id, obj });
+
+    ofstream fout;
+    fout.open("log.txt", ios::app);
+    fout << "add " << obj.get_type() << " " << obj;
+    fout.close();
 }
 
 void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations) {
-    /*if (pipes.size() == 0) {
-        cout << "no pipe" << endl;
-        return;
-    }*/
     if (stations.size() < 2) {
         cout << "not enough stations" << endl;
         return;
@@ -37,6 +38,8 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
         cout << "This stations are already connected" << endl;
         return;
     }
+    ofstream fout;
+    fout.open("log.txt", ios::app);
     cout << "Enter diameter of of pipe: " << endl;
     int d = get_correct_diam();
     for (auto& i : pipes) if (check_by_diameter(i.second, d) and i.second.in_system == false and i.second.reparied == false) {
@@ -44,6 +47,8 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
         i.second.in_system = true;
         system.insert({ g.id, g });
         cout << g << endl;
+        fout << "add " << g.get_type() << " " << g;
+        fout.close();
         return;
     }
     cout << "no suitable pipe. Want to create a new pipe?(1- yes, 0 - no)" << endl;
@@ -61,6 +66,9 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
         g.pipe_id = p.id;
         pipes.insert({ p.id, p });
         system.insert({ g.id, g });
+        fout << "add " << p.get_type() << " " << p;
+        fout << "add " << g.get_type() << " " << g;
+        fout.close();
         cout << g << endl;
         return;
     }
@@ -80,7 +88,7 @@ void show_objects(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
     else cout << "no stations" << endl;
     if (system.size() > 0) {
         cout << "Systems" << endl;
-        for (auto i : system) cout << i.second;
+        for (auto& i : system) cout << i.second;
     }
     else cout << "no system" << endl;
 }
@@ -88,6 +96,9 @@ void show_objects(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
 void edit_pipes(unordered_map<int, CPipe>& pipes) {
     set<int> pipes_to_edit;
     if (pipes.size() > 0) {
+        ofstream fout;
+        fout.open("log.txt", ios::app);
+        fout << "edit pipe ";
         cout << "Edit all pipes - 0, choose pipes to edit - 1" << endl;
         if (get_correct_number(0, 1)) {
             while (true) {
@@ -98,20 +109,34 @@ void edit_pipes(unordered_map<int, CPipe>& pipes) {
                 }
                 else break;
             }
-            for (auto i : pipes_to_edit) for (auto& j : pipes) if (j.second.id == i) j.second.edit_pipe();
+            for (auto i : pipes_to_edit) for (auto& j : pipes) if (j.second.id == i) {
+                j.second.edit_pipe();
+                fout << j.second;
+            }
         }
-        else for (auto& i : pipes) i.second.edit_pipe();
+        else for (auto& i : pipes) {
+            i.second.edit_pipe();
+            fout << i.second;
+        }
+    fout.close();
     }
     else cout << "no pipe" << endl;
 }
 
 void edit_stations(unordered_map<int, CStation>& stations) {
-    if (stations.size() > 0) (select_station(stations)).edit_station();
+    if (stations.size() > 0) {
+        ofstream fout;
+        fout.open("log.txt", ios::app);
+        fout << "edit station";
+        (select_station(stations)).edit_station();
+        fout.close();
+    }
     else cout << "no stations" << endl;
 }
 
 void delete_object(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& systems) {
     int id;
+
     cout << "Delete pipe - 0, delete station - 1, delete system - 2 " << endl;
     int command = get_correct_number(0, 2);
     if (command == 1 && stations.size() > 0) {
@@ -152,19 +177,28 @@ void find_pipe(const unordered_map<int, CPipe>& pipes) {
     bool status;
     cout << "Find pipe by name - 0, find pipe by reparied status - 1 :" << endl;
     command = get_correct_number(0, 1);
+    ofstream fout;
+    fout.open("log.txt", ios::app);
     if (command) {
         cout << "Enter reparied status (0 - no, 1 - yes): " << endl;
         cin >> status;
-        for (auto i : find_pipe_by_filter(pipes, check_by_reparied, status))
+        fout << "find pipe by reparied status " << status << " Result : ";
+        for (auto i : find_pipe_by_filter(pipes, check_by_reparied, status)) {
             cout << i.second;
+            fout << i.second;
+        }
     }
     else {
         cout << "Enter name: " << endl;
         cin.ignore(1000, '\n');
         getline(cin, name);
-        for (auto i : find_pipe_by_filter(pipes, check_by_name, name))
+        fout << "find pipe by name " << name << " Result : ";
+        for (auto i : find_pipe_by_filter(pipes, check_by_name, name)){
             cout << i.second;
+        fout << i.second;
     }
+    }
+    fout.close();
 }
 
 void find_station(const unordered_map<int, CStation>& stations) {
@@ -174,21 +208,30 @@ void find_station(const unordered_map<int, CStation>& stations) {
     }
     string name;
     int command;
+    ofstream fout;
+    fout.open("log.txt", ios::app);
     cout << "Find station by name - 0, find station by percentage of not working guilds - 1 :" << endl;
     command = get_correct_number(0, 1);
     if (command) {
         cout << "Enter percentage of not working guilds" << endl;
         double target = get_correct_number(0.0, 100.0);
-        for (auto i : find_station_by_filter(stations, check_by_working_guilds, target))
+        fout << "find station by percentage of work.guild " << target << " Result:";
+        for (auto i : find_station_by_filter(stations, check_by_working_guilds, target)) {
             cout << i.second;
+            fout << i.second;
+        }
     }
     else {
         cout << "Enter name: " << endl;
         cin.ignore(1000, '\n');
         getline(cin, name);
-        for (auto i : find_station_by_filter(stations, check_by_name, name))
+        fout << "find station by name " << name << " Result:";
+        for (auto i : find_station_by_filter(stations, check_by_name, name)){
             cout << i.second;
+            fout << i.second;
     }
+    }
+    fout.close();
 }
 
 void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>& stations, unordered_map<int, CSystem>& systems) {
@@ -196,10 +239,17 @@ void save_to_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStation>
         cout << "no pipe, no station" << endl;
         return;
     }
-    ofstream fout;
+    
     string filename;
     cout << "Enter file name" << endl;
     cin >> filename;
+
+    ofstream logout;
+    logout.open("log.txt", ios::app);
+    logout << "save to file " << filename << endl;
+    logout.close();
+
+    ofstream fout;
     fout.open(filename, ios::out);
     if (fout.is_open()) {
         fout << pipes.size() << endl;
@@ -246,6 +296,12 @@ void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStatio
     string filename;
     cout << "Enter file name" << endl;
     cin >> filename;
+
+    ofstream fout;
+    fout.open("log.txt", ios::app);
+    fout << "load from file " << filename << endl;
+    fout.close();
+
     fin.open(filename, ios::in);
     if (fin.is_open()) {
         fin >> counter;
@@ -273,6 +329,46 @@ void load_from_file(unordered_map<int, CPipe>& pipes, unordered_map<int, CStatio
         }
     }
     else cout << "File is not open. Maybe it doesn't exist" << endl;
+}
+
+void sort_graph(unordered_map<int, CSystem> systems) {
+    if (systems.size() == 0) {
+        cout << "no system" << endl;
+        return;
+    }
+
+    ofstream fout;
+    fout.open("log.txt", ios::app);
+    fout << "sort graph" << endl;
+
+    bool flag = true;
+    unordered_map<int, vector<int>> graph = create_graph(systems);
+    vector<int> counter;
+    for (auto& i : systems) {
+        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+    }
+    unordered_map<int, int> visited;
+    for (int i : counter) visited.insert({ i, 0 });
+    vector<int> order;
+    counter.pop_back();
+    for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
+    if (flag) {
+        reverse(order.begin(), order.end());
+        cout << "Result" << endl;
+        fout << "Result" << endl;
+        for (int v : order) {
+            cout << v << '\t';
+            fout << v << '\t';
+        }
+        cout << endl;
+        fout << endl;
+    }
+    else {
+        cout << "Cycle in the graph. Topological sorting is not possible" << endl;
+        fout << "Cycle in the graph" << endl;
+    }
+    fout.close();
 }
 
 void menu() {
@@ -344,6 +440,5 @@ int main()
     return 0;
 }
 
-// топологическая сортировка проверка на отсутствие циклов
 //логирование - ?
 

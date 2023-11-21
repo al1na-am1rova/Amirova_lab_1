@@ -35,6 +35,11 @@ void CPipe :: edit_pipe()
     cout << "Pipe name: " << name << "  Pipe status: (1 - is reparied, 0 - is not reparied): " << reparied << endl;
 }
 
+std::string CPipe::get_type()
+{
+    return "Oil pipe";
+}
+
 CPipe& CPipe::select_pipe(std::vector<CPipe>& pipes)
 {
     cout << "Enter id: " << endl;

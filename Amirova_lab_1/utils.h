@@ -79,12 +79,26 @@ unordered_map<int, CStation> find_station_by_filter(const unordered_map<int, CSt
 
 template<typename T>
 void erase(unordered_map<int, T>& objects, int id) {
-    if (objects.find(id) != objects.end()) objects.erase(objects.find(id));
+    if (objects.find(id) != objects.end()) {
+
+        ofstream fout;
+        fout.open("log.txt", ios::app);
+        fout << "delete " << objects.at(id).get_type() << "id: " << id;
+        fout.close();
+
+        objects.erase(objects.find(id));
+    }
     else cout << "there is no object with this id" << endl;
 }
 
 void erase_system(unordered_map<int, CSystem>& systems, int id, unordered_map<int, CPipe>& pipes) {
     if (systems.find(id) != systems.end()) {
+
+        ofstream fout;
+        fout.open("log.txt", ios::app);
+        fout << "delete system id: " << id;
+        fout.close();
+
         for (auto& i : systems) if (i.first == id) (pipes.at(i.second.pipe_id)).in_system=false;
         systems.erase(systems.find(id));
     }
@@ -166,26 +180,28 @@ void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>&
     return;
 }
 
-void sort_graph(unordered_map<int, CSystem> systems) {
-    bool flag = true;
-    unordered_map<int, vector<int>> graph = create_graph(systems);
-    vector<int> counter;
-    for (auto& i : systems) {
-        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
-        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
-    }
-    unordered_map<int, int> visited;
-    /*vector<int> visited;*/
-    for (int i : counter) visited.insert({ i, 0 });
-    vector<int> order;
-    counter.pop_back();
-    /*for (int v :counter) if (find(visited.begin(), visited.end(), v) == visited.end()) dfs(graph, v, visited, order);*/
-    for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
-    if (flag) {
-        reverse(order.begin(), order.end());
-        cout << "Result" << endl;
-        for (int v : order) cout << v << '\t';
-        cout << endl;
-    }
-    else cout << "Cycle in the graph. Topological sorting is not possible" << endl;
-}
+//void sort_graph(unordered_map<int, CSystem> systems) {
+//    if (systems.size() == 0) {
+//        cout << "no system" << endl;
+//        return;
+//    }
+//    bool flag = true;
+//    unordered_map<int, vector<int>> graph = create_graph(systems);
+//    vector<int> counter;
+//    for (auto& i : systems) {
+//        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+//        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+//    }
+//    unordered_map<int, int> visited;
+//    for (int i : counter) visited.insert({ i, 0 });
+//    vector<int> order;
+//    counter.pop_back();
+//    for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
+//    if (flag) {
+//        reverse(order.begin(), order.end());
+//        cout << "Result" << endl;
+//        for (int v : order) cout << v << '\t';
+//        cout << endl;
+//    }
+//    else cout << "Cycle in the graph. Topological sorting is not possible" << endl;
+//}

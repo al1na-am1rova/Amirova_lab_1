@@ -3,6 +3,7 @@
 #include "CStation.h"
 #include <string>
 #include <vector>
+#include <fstream>
 
 int CStation::MaxId = 0;
 
@@ -32,6 +33,15 @@ void CStation::edit_station()
         std::cout << "Enter number of working guild" << std::endl;
         number_of_working_guild = get_correct_number(0, number_of_guild);
         std::cout << "Station name: " << name << "  Number of working guild: " << number_of_working_guild << std::endl;
+        std::ofstream fout;
+        fout.open("log.txt", std::ios::app);
+        fout << "Station name: " << name << "  Number of working guild: " << number_of_working_guild << std::endl;
+        fout.close();
+}
+
+std:: string CStation::get_type()
+{
+    return "Oil pumping station";
 }
 
 std::ostream& operator<<(std::ostream& out, const CStation& s)

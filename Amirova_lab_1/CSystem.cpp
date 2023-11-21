@@ -11,6 +11,11 @@ CSystem::CSystem() {
     id = MaxId++;
 }
 
+string CSystem::get_type()
+{
+    return "system";
+}
+
 template <typename T>
 T get_correct_number(T min, T max)
 {
