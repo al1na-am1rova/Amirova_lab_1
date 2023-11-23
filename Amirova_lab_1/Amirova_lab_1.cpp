@@ -351,7 +351,9 @@ void sort_graph(unordered_map<int, CSystem> systems) {
     unordered_map<int, int> visited;
     for (int i : counter) visited.insert({ i, 0 });
     vector<int> order;
+    /*for (auto i : counter) cout << i;
     counter.pop_back();
+    for (auto i : counter) cout << i;*/
     for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
     if (flag) {
         reverse(order.begin(), order.end());
@@ -440,5 +442,4 @@ int main()
     return 0;
 }
 
-//логирование - ?
-
+ //перенести функции , которые отвечают за редактирование , удаление и поиск в файл систем,в мэйне только меню. поменять вход и выъод местами

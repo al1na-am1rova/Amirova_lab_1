@@ -179,29 +179,3 @@ void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>&
     visited[v] = 2;
     return;
 }
-
-//void sort_graph(unordered_map<int, CSystem> systems) {
-//    if (systems.size() == 0) {
-//        cout << "no system" << endl;
-//        return;
-//    }
-//    bool flag = true;
-//    unordered_map<int, vector<int>> graph = create_graph(systems);
-//    vector<int> counter;
-//    for (auto& i : systems) {
-//        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
-//        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
-//    }
-//    unordered_map<int, int> visited;
-//    for (int i : counter) visited.insert({ i, 0 });
-//    vector<int> order;
-//    counter.pop_back();
-//    for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
-//    if (flag) {
-//        reverse(order.begin(), order.end());
-//        cout << "Result" << endl;
-//        for (int v : order) cout << v << '\t';
-//        cout << endl;
-//    }
-//    else cout << "Cycle in the graph. Topological sorting is not possible" << endl;
-//}
