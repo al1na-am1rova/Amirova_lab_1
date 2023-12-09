@@ -1,8 +1,9 @@
 #include "CSystem.h"
 #include <iostream>
 #include <string>
-#include "CStation.h"
 #include "CPipe.h"
+#include "CStation.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -43,9 +44,9 @@ ostream& operator<<(ostream& out, const CSystem& g)
 istream& operator>>(istream& in, CSystem& g)
 {
     cout << "Oil Pipeline System" << endl;
-    cout << "Enter id of entrance station: ";
+    cout << "Enter id of start station: ";
     g.entrance_id = get_correct_number(0, CStation::MaxId);
-    cout << "Enter id of exit station: " << endl;
+    cout << "Enter id of end station: " << endl;
     g.exit_id = get_correct_number(0, CStation::MaxId);
     cout << "Enter id of of pipe: " << endl;
     g.pipe_id = get_correct_number(0, CPipe::MaxId);

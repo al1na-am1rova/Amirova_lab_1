@@ -42,7 +42,7 @@ void add_system(unordered_map<int, CSystem>& system, unordered_map<int, CPipe>& 
     fout.open("log.txt", ios::app);
     cout << "Enter diameter of of pipe: " << endl;
     int d = get_correct_diam();
-    for (auto& i : pipes) if (check_by_diameter(i.second, d) and i.second.in_system == false and i.second.reparied == false) {
+    for (auto& i : pipes) if (check_by_diameter(i.second, d) and i.second.in_system == false/* and i.second.reparied == false*/) {
         g.pipe_id = i.second.id;
         i.second.in_system = true;
         system.insert({ g.id, g });
@@ -351,9 +351,6 @@ void sort_graph(unordered_map<int, CSystem> systems) {
     unordered_map<int, int> visited;
     for (int i : counter) visited.insert({ i, 0 });
     vector<int> order;
-    /*for (auto i : counter) cout << i;
-    counter.pop_back();
-    for (auto i : counter) cout << i;*/
     for (int v : counter) if (visited[v] == 0) (dfs(graph, v, visited, order, flag));
     if (flag) {
         reverse(order.begin(), order.end());
@@ -387,6 +384,7 @@ void menu() {
         << "10 - delete object by id " << endl
         << "11 - create Oil Pipeline System " << endl
         << "12 - sort graph of systems " << endl
+        << "13 - find shortest way" << endl
         << "0 - exit" << endl;
 }
 
@@ -398,7 +396,7 @@ int main()
 
     while (true) {
         menu();
-        int command = get_correct_number(0, 12);
+        int command = get_correct_number(0, 13);
         switch (command) {
         case 1:
             add_object(pipes);
@@ -436,10 +434,13 @@ int main()
         case 12:
             sort_graph(systems);
             break;
+        case 13:
+            find_shortest_way(systems, stations, pipes);
+            break;
         case 0: return 0;
         }
     }
     return 0;
 }
 
- //перенести функции , которые отвечают за редактирование , удаление и поиск в файл систем,в мэйне только меню. поменять вход и выъод местами
+ //перенести функции , которые отвечают за редактирование , удаление и поиск в файл систем,в мэйне только меню

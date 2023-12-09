@@ -40,13 +40,6 @@ std::string CPipe::get_type()
     return "Oil pipe";
 }
 
-CPipe& CPipe::select_pipe(std::vector<CPipe>& pipes)
-{
-    cout << "Enter id: " << endl;
-    int id = get_correct_number(0, CPipe::MaxId - 1);
-    for (auto i : pipes) if (i.id == id) return i;
-}
-
 int get_correct_diameter()
 {
     int x;

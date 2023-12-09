@@ -1,5 +1,8 @@
 #pragma once
 #include <iostream>
+#include "CPipe.h"
+#include "CStation.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -19,5 +22,5 @@ public:
 	friend  ostream& operator << (ostream& out, const CSystem& g);
 	friend istream& operator >> (istream& in, CSystem& g);
 	string get_type();
+	/*CPipe& select_pipe(vector<CPipe>& pipes);*/
 };
-

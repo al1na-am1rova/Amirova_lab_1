@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-
+#include <queue>
 using namespace std;
 
 template <typename T>
@@ -59,6 +59,10 @@ bool check_by_working_guilds(const CStation& s, double target)
     double wg = s.number_of_working_guild;
     double g = s.number_of_guild;
     return ((g - wg) / g) * 100 == target;
+}
+
+CPipe& select_pipe(unordered_map<int, CPipe>& pipes, int id) {
+    for (auto& i : pipes) if (i.first == id) return i.second;
 }
 
 template <typename T>
@@ -164,6 +168,85 @@ unordered_map<int, vector<int>> create_graph(unordered_map<int, CSystem>& system
     }
     return graph;
 }
+
+//void bfs(unordered_map<int, vector<int>>& graph, int id, vector<int>& visited, unordered_map<int, vector<int>>& steps, int step) {
+//    queue<int> q;
+//    visited.push_back(id);
+//    q.push(id);
+//    while (q.size() > 0) {
+//        int m = q.front();
+//        if (find(steps.at(step - 1).begin(), steps.at(step - 1).end(), m) == steps.at(step - 1).end()) {
+//            steps.at(step).push_back(m);
+//        }
+//        if (graph.count(m)) {
+//            for (int i : graph.at(id)) {
+//                if (find(visited.begin(), visited.end(), i) == visited.end()) {
+//                    q.push(i);
+//                    visited.push_back(i);
+//                }
+//            }
+//        }
+//        q.pop();
+//
+//    }
+//
+//
+//}
+//
+
+vector<vector<int>> create_matrix(unordered_map<int, CSystem>& systems, unordered_map<int, CPipe>& pipes, int vertex_num) {
+    vector<vector<int>> matrix;
+    for (int i = 0; i < vertex_num; i++) matrix.push_back({});
+    for (int i = 0; i < vertex_num; i++) for (int j = 0; j < vertex_num; j++) {
+        if (i == j) matrix[i].push_back(0);
+        else matrix[i].push_back(10000);
+    }
+
+    for (auto i : systems) matrix[i.second.entrance_id][i.second.exit_id] = select_pipe(pipes, i.second.pipe_id).length;
+    return matrix;
+
+}
+
+void find_shortest_way(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
+    if (systems.size() < 2) {
+        cout << "Number of systems is too small" << endl;
+        return;
+    }
+    int start_id, stop_id, min, minindex;
+    vector<int> visited, d;
+    cout << "Type start station: " << endl;
+    start_id = get_correct_entrance_id(stations);
+    cout << "Type stop station: " << endl;
+    stop_id = get_correct_exit_id(stations, start_id);
+    vector<int> counter;
+    for (auto& i : systems) {
+        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+    }
+    unordered_map<int, vector<int>> graph = create_graph(systems);
+    vector<vector<int>> matrix = create_matrix(systems, pipes, counter.size());
+    for (int i = 0; i < counter.size(); i++) d.push_back(10000);
+    d[start_id] = 0;
+
+    for (int i = 0; i < counter.size(); ++i) {
+        min = 10000;
+        for (int j = 0; j < counter.size() ; j++) {
+            if ((find(visited.begin(), visited.end(), j) == visited.end()) && (d[j] < min)) {
+                min = d[j];
+                minindex = j;
+            }
+        }
+        visited.push_back(minindex);
+        for (int j = 0; j < counter.size() ; j++) {
+            if ((find(visited.begin(), visited.end(), i) == visited.end()) && matrix[minindex][j] > 0 && d[minindex] != 10000 && d[minindex] + matrix[minindex][j] < d[j]) {
+                d[j] = d[minindex] + matrix[minindex][j];
+            } 
+        }     
+    }
+
+    cout << "Distance : " << d[stop_id] << endl;
+}
+
 
 void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>& visited, vector<int>& order, bool& flag) {
     visited[v] = 1;

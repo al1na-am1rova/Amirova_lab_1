@@ -25,7 +25,6 @@ public:
     friend std::istream& operator >> (std::istream& in, CPipe& p);
     void edit_pipe();
     std::string get_type();
-    CPipe& select_pipe(std::vector<CPipe>& pipes);
 
 };
 
