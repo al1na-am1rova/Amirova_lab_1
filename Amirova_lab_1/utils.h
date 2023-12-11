@@ -243,8 +243,8 @@ void find_shortest_way(unordered_map<int, CSystem>& systems, unordered_map<int, 
             } 
         }     
     }
-
-    cout << "Distance : " << d[stop_id] << endl;
+    if (d[stop_id] == 10000) cout << "no way between station " << start_id << " and station " << stop_id << endl;
+    else cout << "Distance : " << d[stop_id] << endl;
 }
 
 
