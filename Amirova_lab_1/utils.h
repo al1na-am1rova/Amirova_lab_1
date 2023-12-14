@@ -61,9 +61,9 @@ bool check_by_working_guilds(const CStation& s, double target)
     return ((g - wg) / g) * 100 == target;
 }
 
-CPipe& select_pipe(unordered_map<int, CPipe>& pipes, int id) {
-    for (auto& i : pipes) if (i.first == id) return i.second;
-}
+//CPipe& select_pipe(unordered_map<int, CPipe>& pipes, int id) {
+//    for (auto& i : pipes) if (i.first == id) return i.second;
+//}
 
 template <typename T>
 unordered_map<int, CPipe> find_pipe_by_filter(const unordered_map<int, CPipe>& objects, PFilter<T> f, T param) {
@@ -91,20 +91,6 @@ void erase(unordered_map<int, T>& objects, int id) {
         fout.close();
 
         objects.erase(objects.find(id));
-    }
-    else cout << "there is no object with this id" << endl;
-}
-
-void erase_system(unordered_map<int, CSystem>& systems, int id, unordered_map<int, CPipe>& pipes) {
-    if (systems.find(id) != systems.end()) {
-
-        ofstream fout;
-        fout.open("log.txt", ios::app);
-        fout << "delete system id: " << id;
-        fout.close();
-
-        for (auto& i : systems) if (i.first == id) (pipes.at(i.second.pipe_id)).in_system=false;
-        systems.erase(systems.find(id));
     }
     else cout << "there is no object with this id" << endl;
 }
@@ -140,113 +126,27 @@ int get_correct_exit_id(unordered_map<int, CStation> stations, int entrance_id) 
     return x;
 }
 
-bool already_in_system(int entrance_id, int exit_id, unordered_map<int, CSystem> systems) {
-    for (auto i : systems) if (i.second.entrance_id == entrance_id and i.second.exit_id == exit_id) return true;
-    return false;
-}
-
-int is_station_in_system(int id, unordered_map<int, CSystem> systems) {
-    for (auto i : systems) if (i.second.entrance_id == id || i.second.exit_id == id) return i.first;
-    return -1;
-}
-
-int is_pipe_in_system(int id, unordered_map<int, CSystem> systems) {
-    for (auto i : systems) if (i.second.pipe_id == id) return i.first;
-    return -1;
-}
-
-unordered_map<int, vector<int>> create_graph(unordered_map<int, CSystem>& systems) {
-    unordered_map<int, vector<int>> graph;
-    for (auto i : systems) {
-        if (graph.find(i.second.entrance_id) == graph.end()) {
-            vector<int> current = { i.second.exit_id };
-            graph.insert({ i.second.entrance_id, current });
+void bfs(unordered_map<int, vector<int>>& graph, int id, vector<int>& visited, unordered_map<int, vector<int>>& steps, int step) {
+    queue<int> q;
+    visited.push_back(id);
+    q.push(id);
+    while (q.size() > 0) {
+        int m = q.front();
+        if (find(steps.at(step - 1).begin(), steps.at(step - 1).end(), m) == steps.at(step - 1).end()) {
+            steps.at(step).push_back(m);
         }
-        else {
-            graph.at(i.second.entrance_id).push_back(i.second.exit_id);
-        }
-    }
-    return graph;
-}
-
-//void bfs(unordered_map<int, vector<int>>& graph, int id, vector<int>& visited, unordered_map<int, vector<int>>& steps, int step) {
-//    queue<int> q;
-//    visited.push_back(id);
-//    q.push(id);
-//    while (q.size() > 0) {
-//        int m = q.front();
-//        if (find(steps.at(step - 1).begin(), steps.at(step - 1).end(), m) == steps.at(step - 1).end()) {
-//            steps.at(step).push_back(m);
-//        }
-//        if (graph.count(m)) {
-//            for (int i : graph.at(id)) {
-//                if (find(visited.begin(), visited.end(), i) == visited.end()) {
-//                    q.push(i);
-//                    visited.push_back(i);
-//                }
-//            }
-//        }
-//        q.pop();
-//
-//    }
-//
-//
-//}
-//
-
-vector<vector<int>> create_matrix(unordered_map<int, CSystem>& systems, unordered_map<int, CPipe>& pipes, int vertex_num) {
-    vector<vector<int>> matrix;
-    for (int i = 0; i < vertex_num; i++) matrix.push_back({});
-    for (int i = 0; i < vertex_num; i++) for (int j = 0; j < vertex_num; j++) {
-        if (i == j) matrix[i].push_back(0);
-        else matrix[i].push_back(10000);
-    }
-
-    for (auto i : systems) matrix[i.second.entrance_id][i.second.exit_id] = select_pipe(pipes, i.second.pipe_id).length;
-    return matrix;
-
-}
-
-void find_shortest_way(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
-    if (systems.size() < 2) {
-        cout << "Number of systems is too small" << endl;
-        return;
-    }
-    int start_id, stop_id, min, minindex;
-    vector<int> visited, d;
-    cout << "Type start station: " << endl;
-    start_id = get_correct_entrance_id(stations);
-    cout << "Type stop station: " << endl;
-    stop_id = get_correct_exit_id(stations, start_id);
-    vector<int> counter;
-    for (auto& i : systems) {
-        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
-        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
-    }
-    unordered_map<int, vector<int>> graph = create_graph(systems);
-    vector<vector<int>> matrix = create_matrix(systems, pipes, counter.size());
-    for (int i = 0; i < counter.size(); i++) d.push_back(10000);
-    d[start_id] = 0;
-
-    for (int i = 0; i < counter.size(); ++i) {
-        min = 10000;
-        for (int j = 0; j < counter.size() ; j++) {
-            if ((find(visited.begin(), visited.end(), j) == visited.end()) && (d[j] < min)) {
-                min = d[j];
-                minindex = j;
+        if (graph.count(m)) {
+            for (int i : graph.at(id)) {
+                if (find(visited.begin(), visited.end(), i) == visited.end()) {
+                    q.push(i);
+                    visited.push_back(i);
+                }
             }
         }
-        visited.push_back(minindex);
-        for (int j = 0; j < counter.size() ; j++) {
-            if ((find(visited.begin(), visited.end(), i) == visited.end()) && matrix[minindex][j] > 0 && d[minindex] != 10000 && d[minindex] + matrix[minindex][j] < d[j]) {
-                d[j] = d[minindex] + matrix[minindex][j];
-            } 
-        }     
-    }
-    if (d[stop_id] == 10000) cout << "no way between station " << start_id << " and station " << stop_id << endl;
-    else cout << "Distance : " << d[stop_id] << endl;
-}
+        q.pop();
 
+    }
+}
 
 void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>& visited, vector<int>& order, bool& flag) {
     visited[v] = 1;
@@ -261,4 +161,47 @@ void dfs(unordered_map<int, vector<int>>& graph, int v, unordered_map<int, int>&
     order.push_back(v);
     visited[v] = 2;
     return;
+}
+
+bool is_adj(int start, int stop, unordered_map<int, CSystem> systems) {
+    for (auto i : systems) {
+        if (i.second.entrance_id == start && i.second.exit_id == stop) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool contains_adj(int v, vector<int> vertexes, unordered_map<int, CSystem> systems) {
+    for (int j : vertexes) {
+        for (auto i : systems) {
+            if (i.second.entrance_id == j && i.second.exit_id == v) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int get_system_capacity(int start, int stop, unordered_map<int, CSystem> systems) {
+    for (auto& i : systems) {
+        if (i.second.entrance_id == start and i.second.exit_id == stop) {
+            return i.second.flow_capacity;
+        }
+    }
+    return 0;
+}
+
+int max_path(vector<int> way, unordered_map<int, CSystem>& systems) {
+    int mx = 10000;
+    int i = 0;
+    int j = 1;
+    while (j < way.size()) {
+        int stop = way[i];
+        int start = way[j];
+        mx = min(mx , get_system_capacity(start, stop, systems));
+        i++;
+        j++;
+    }
+    return mx;
 }

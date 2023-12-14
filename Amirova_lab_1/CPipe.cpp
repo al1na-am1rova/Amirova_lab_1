@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include "CPipe.h"
 
 
@@ -77,3 +78,4 @@ istream& operator >> (istream& in, CPipe& p) {
     p.reparied = get_correct_number(0, 1);
     return in;
 }
+

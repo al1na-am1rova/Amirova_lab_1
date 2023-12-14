@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 
 class CPipe
@@ -14,6 +15,7 @@ public:
     int diameter;
     bool reparied;
     bool in_system;
+    int productivity;
 
     template <typename T>
     friend T get_correct_number(T min, T max);

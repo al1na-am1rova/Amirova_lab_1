@@ -4,6 +4,7 @@
 #include <vector>
 #include<set>
 #include <unordered_map>
+#include <cmath>
 #include "CPipe.h"
 #include "CStation.h"
 #include "CSystem.h"
@@ -370,6 +371,98 @@ void sort_graph(unordered_map<int, CSystem> systems) {
     fout.close();
 }
 
+void find_shortest_way(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
+    if (systems.size() < 2) {
+        cout << "Number of systems is too small" << endl;
+        return;
+    }
+    int start_id, stop_id, min, minindex;
+    vector<int> visited, d;
+    cout << "Type start station: " << endl;
+    start_id = get_correct_entrance_id(stations);
+    cout << "Type stop station: " << endl;
+    stop_id = get_correct_exit_id(stations, start_id);
+
+    vector<int> counter;
+    for (auto& i : systems) {
+        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+    }
+    unordered_map<int, vector<int>> graph = create_graph(systems);
+    vector<vector<int>> matrix = create_matrix(systems, pipes, counter.size());
+    for (int i = 0; i < counter.size(); i++) d.push_back(10000);
+    d[start_id] = 0;
+
+    for (int i = 0; i < counter.size(); ++i) {
+        min = 10000;
+        for (int j = 0; j < counter.size(); j++) {
+            if ((find(visited.begin(), visited.end(), j) == visited.end()) && (d[j] < min)) {
+                min = d[j];
+                minindex = j;
+            }
+        }
+        visited.push_back(minindex);
+        for (int j = 0; j < counter.size(); j++) {
+            if ((find(visited.begin(), visited.end(), i) == visited.end()) && matrix[minindex][j] > 0 && d[minindex] != 10000 && d[minindex] + matrix[minindex][j] < d[j]) {
+                d[j] = d[minindex] + matrix[minindex][j];
+            }
+        }
+    }
+    if (d[stop_id] == 10000) cout << "no way between station " << start_id << " and station " << stop_id << endl;
+    else cout << "Distance : " << d[stop_id] << endl;
+}
+
+void find_maximum_flow(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
+    cout << "Enter start station ";
+    int start = get_correct_entrance_id(stations);
+    cout << "Enter stop station ";
+    int stop = get_correct_exit_id(stations, start);
+    bool flag = true;
+
+    for (auto& i : systems) {
+        get_flow_capacity(pipes, i.second);
+    }
+
+    unordered_map<int, vector<int>> graph = create_graph(systems);
+
+    vector<int> counter;
+    for (auto& i : systems) {
+        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+    }
+
+    //найдем все пути
+
+    unordered_map<int, vector<int>> steps = { {0, {start} } };
+    for (int i = 1; i < counter.size(); i ++) {
+        steps.insert({ i, {} });
+    }
+    vector<int> visited;
+    int step = 1;
+    while (find(steps.at(step-1).begin(), steps.at(step-1).end(), stop) == steps.at(step-1).end() && step < counter.size()){
+        for (int i : steps.at(step-1)) bfs(graph, i, visited,steps,step);
+        step++;
+    }
+
+    vector<int> cur_way;
+        cur_way.push_back(stop);
+        for (int i = step - 1; i > 0; i--) {
+            for (int j : steps.at(i)) {
+                if (is_adj(j, cur_way.back(), systems)) {
+                    cur_way.push_back(j);
+                }
+            }
+        }
+        cur_way.push_back(start);
+        //reverse(cur_way.begin(), cur_way.end());
+
+        int mx = max_path(cur_way, systems);
+        cout << mx << endl;
+
+        /*это максимальный поток в одном пути нужно добавить остальный пути в цикле!!!!*/
+
+}
+
 void menu() {
     cout << "Menu" << endl
         << "1 - create oil pipe" << endl
@@ -385,6 +478,7 @@ void menu() {
         << "11 - create Oil Pipeline System " << endl
         << "12 - sort graph of systems " << endl
         << "13 - find shortest way" << endl
+        << "14 - find maximum flow" << endl
         << "0 - exit" << endl;
 }
 
@@ -396,7 +490,7 @@ int main()
 
     while (true) {
         menu();
-        int command = get_correct_number(0, 13);
+        int command = get_correct_number(0, 14);
         switch (command) {
         case 1:
             add_object(pipes);
@@ -436,6 +530,9 @@ int main()
             break;
         case 13:
             find_shortest_way(systems, stations, pipes);
+            break;
+        case 14:
+            find_maximum_flow(systems, stations, pipes);
             break;
         case 0: return 0;
         }
