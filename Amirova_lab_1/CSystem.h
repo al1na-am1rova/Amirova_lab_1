@@ -14,7 +14,6 @@ public:
 	int entrance_id;
 	int exit_id;
 	int pipe_id;
-	int flow = 0;
 	int flow_capacity;
 
 	CSystem();

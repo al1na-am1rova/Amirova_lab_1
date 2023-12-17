@@ -412,55 +412,80 @@ void find_shortest_way(unordered_map<int, CSystem>& systems, unordered_map<int, 
     else cout << "Distance : " << d[stop_id] << endl;
 }
 
-void find_maximum_flow(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
-    cout << "Enter start station ";
-    int start = get_correct_entrance_id(stations);
-    cout << "Enter stop station ";
-    int stop = get_correct_exit_id(stations, start);
-    bool flag = true;
+bool dfs(vector<vector<int>>& graph, int u, int sink, vector<bool>& visited, vector<int>& parent) {
+    visited[u] = true;
 
-    for (auto& i : systems) {
-        get_flow_capacity(pipes, i.second);
-    }
+    for (int v = 0; v < graph.size(); v++) {
+        if (!visited[v] && graph[u][v] > 0) {
+            parent[v] = u;
 
-    unordered_map<int, vector<int>> graph = create_graph(systems);
+            if (v == sink) {
+                return true;
+            }
 
-    vector<int> counter;
-    for (auto& i : systems) {
-        if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
-        if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
-    }
-
-    //найдем все пути
-
-    unordered_map<int, vector<int>> steps = { {0, {start} } };
-    for (int i = 1; i < counter.size(); i ++) {
-        steps.insert({ i, {} });
-    }
-    vector<int> visited;
-    int step = 1;
-    while (find(steps.at(step-1).begin(), steps.at(step-1).end(), stop) == steps.at(step-1).end() && step < counter.size()){
-        for (int i : steps.at(step-1)) bfs(graph, i, visited,steps,step);
-        step++;
-    }
-
-    vector<int> cur_way;
-        cur_way.push_back(stop);
-        for (int i = step - 1; i > 0; i--) {
-            for (int j : steps.at(i)) {
-                if (is_adj(j, cur_way.back(), systems)) {
-                    cur_way.push_back(j);
-                }
+            if (dfs(graph, v, sink, visited, parent)) {
+                return true;
             }
         }
-        cur_way.push_back(start);
-        //reverse(cur_way.begin(), cur_way.end());
+    }
 
-        int mx = max_path(cur_way, systems);
-        cout << mx << endl;
+    return false;
+}
 
-        /*это максимальный поток в одном пути нужно добавить остальный пути в цикле!!!!*/
+void ford_fulkerson_method(unordered_map<int, CSystem>& systems, unordered_map<int, CStation>& stations, unordered_map<int, CPipe>& pipes) {
+    int maxFlow = 0;
 
+    cout << "Type source station" << endl;
+    int source = get_correct_entrance_id(stations);
+    cout << "Type sink station" << endl;
+    int sink = get_correct_exit_id(stations,source);
+
+    for (auto& i : systems) get_flow_capacity(pipes, i.second);
+
+    vector<int> counter;
+        for (auto& i : systems) {
+            if (find(counter.begin(), counter.end(), i.second.entrance_id) == counter.end()) counter.push_back(i.second.entrance_id);
+            if (find(counter.begin(), counter.end(), i.second.exit_id) == counter.end()) counter.push_back(i.second.exit_id);
+        }   
+
+    vector<vector<int>> graph;
+    for (int i = 0; i < counter.size(); i++) {
+        graph.push_back({});
+        for (int j = 0; j < counter.size(); j++) graph[i].push_back(0);
+    }
+
+    for (int i = 0; i < counter.size(); i++) {
+        for (int j = 0; j < counter.size(); j++) {
+            for (auto s : systems) if (s.second.entrance_id == i && s.second.exit_id == j) graph[i][j] = s.second.flow_capacity;
+        }
+    }
+
+    int V = graph.size();
+    while (true) {
+        vector<bool> visited(V, false);
+        vector<int> parent(V, -1);
+        if (!dfs(graph, source, sink, visited, parent)) {
+            break;
+        }
+        int pathFlow = INT_MAX;
+
+        for (int v = sink; v != source; v = parent[v]) {
+            int u = parent[v];
+            pathFlow = min(pathFlow, graph[u][v]);
+        }
+
+        for (int v = sink; v != source; v = parent[v]) {
+            int u = parent[v];
+            graph[u][v] -= pathFlow;
+            graph[v][u] += pathFlow;
+
+        }
+
+        maxFlow += pathFlow;
+    }
+
+    cout << "Max flow: " << maxFlow << endl;
+    return;
 }
 
 void menu() {
@@ -532,7 +557,7 @@ int main()
             find_shortest_way(systems, stations, pipes);
             break;
         case 14:
-            find_maximum_flow(systems, stations, pipes);
+            ford_fulkerson_method(systems, stations, pipes);
             break;
         case 0: return 0;
         }
